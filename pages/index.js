@@ -160,6 +160,15 @@ export default function Home() {
     URL.revokeObjectURL(url)
   }, [yamlPreview])
 
+  const PROTO_COLORS = {
+    hy2:    'bg-violet-500/15 text-violet-400 ring-violet-500/20',
+    anytls: 'bg-cyan-500/15 text-cyan-400 ring-cyan-500/20',
+    vless:  'bg-blue-500/15 text-blue-400 ring-blue-500/20',
+    trojan: 'bg-rose-500/15 text-rose-400 ring-rose-500/20',
+    vmess:  'bg-amber-500/15 text-amber-400 ring-amber-500/20',
+    ss:     'bg-emerald-500/15 text-emerald-400 ring-emerald-500/20',
+  }
+
   const analyzeProxies = () => {
     const PROTO_MAP = {
       'hysteria2://': 'hy2', 'hy2://': 'hy2',
@@ -178,8 +187,8 @@ export default function Home() {
       }
     }
     const total = Object.values(counts).reduce((a, b) => a + b, 0)
-    const detail = Object.entries(counts).map(([p, n]) => `${p}×${n}`).join(' ')
-    return { total, detail }
+    const breakdown = Object.entries(counts)
+    return { total, breakdown }
   }
 
   return (
@@ -188,6 +197,7 @@ export default function Home() {
         <title>Mihomo 订阅转换</title>
         <meta name="description" content="Clash / Mihomo 订阅链接转换工具，支持 Hysteria2、AnyTLS、VLESS Reality 等协议" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </Head>
 
       <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -231,9 +241,20 @@ export default function Home() {
                   </span>
                 )}
                 {analyzeProxies().total > 0 && (
-                  <span className="text-xs bg-blue-600/20 text-blue-400 px-2 py-1 rounded-full" title={analyzeProxies().detail}>
-                    {analyzeProxies().total} 条节点 · {analyzeProxies().detail}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-gray-400">
+                      {analyzeProxies().total} nodes
+                    </span>
+                    <span className="text-gray-700">·</span>
+                    {analyzeProxies().breakdown.map(([proto, count]) => (
+                      <span
+                        key={proto}
+                        className={`text-[11px] font-medium px-2 py-0.5 rounded-full ring-1 ${PROTO_COLORS[proto] ?? 'bg-gray-500/15 text-gray-400 ring-gray-500/20'}`}
+                      >
+                        {proto} <span className="opacity-70">×{count}</span>
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
