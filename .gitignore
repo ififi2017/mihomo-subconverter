@@ -1,0 +1,23 @@
+# Next.js
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Env
+.env
+.env*.local
+
+# Build
+build/
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Claude
+.claude/
