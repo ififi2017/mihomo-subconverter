@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
 
-A lightweight Mihomo / Clash Meta subscription converter. Paste your proxy node links, choose a rule template, and get a ready-to-use configuration file — deployable to Vercel in one click.
+A lightweight Mihomo / Clash subscription converter. Paste your proxy node links, choose a rule template, and get a ready-to-use configuration file — deployable to Vercel in one click.
 
 > Rule sets are based on [ACL4SSR](https://github.com/ACL4SSR/ACL4SSR). Protocol parsing patterns reference [sublink-worker](https://github.com/7Sageer/sublink-worker) by 7Sageer. Thanks to both projects.
 
