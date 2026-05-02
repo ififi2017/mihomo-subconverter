@@ -10,17 +10,33 @@ A lightweight Mihomo / Clash Meta subscription converter. Paste your proxy node 
 
 ---
 
+## Supported Protocols
+
+| Protocol | URI prefix |
+|----------|-----------|
+| Hysteria2 | `hysteria2://` / `hy2://` |
+| AnyTLS | `anytls://` |
+| VLESS | `vless://` |
+| Trojan | `trojan://` |
+| VMess | `vmess://` |
+| Shadowsocks | `ss://` |
+| TUIC | `tuic://` |
+
+Subscription URLs are also supported — paste any `https://` link that returns a list of the above URIs (Base64-encoded or plain), and nodes are extracted automatically.
+
+---
+
 ## Features
 
-- **Multi-protocol support** — Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks, TUIC
-- **Subscription URL import** — Paste a subscription URL and nodes are extracted automatically
-- **INI rule templates** — Use the built-in ACL4SSR Full template or point to any compatible `.ini` file
-- **sub-web compatible** — Template URLs are compatible with [CareyWang/sub-web](https://github.com/CareyWang/sub-web) remote config links
-- **Custom rules** — Append your own `DOMAIN-SUFFIX` / `IP-CIDR` rules with highest priority
-- **Subscription link output** — Generates a URL you can paste directly into any Mihomo-compatible client
-- **Custom domain aware** — Bind a custom domain in Vercel; generated links automatically use it
-- **i18n** — UI available in English and Chinese; adding a new language takes two steps (see below)
-- **Zero-config deploy** — No environment variables needed, just import and deploy
+- **Multi-protocol** — Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks, TUIC
+- **Subscription URL import** — Paste a subscription URL; nodes are extracted automatically
+- **INI rule templates** — Built-in ACL4SSR Full template, or point to any compatible `.ini` file
+- **sub-web compatible** — Template URLs work with [CareyWang/sub-web](https://github.com/CareyWang/sub-web) remote config links without modification
+- **Custom rules** — Prepend your own `DOMAIN-SUFFIX` / `IP-CIDR` rules at highest priority
+- **Live subscription URL** — Generated link always reflects your current proxy list; paste it once into any Mihomo-compatible client
+- **Custom domain aware** — Bind a custom domain in Vercel; generated links use it automatically
+- **i18n** — English and Chinese UI; adding a new language takes two steps (see below)
+- **Zero-config deploy** — No environment variables needed
 
 ---
 

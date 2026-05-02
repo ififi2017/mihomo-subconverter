@@ -46,7 +46,7 @@
     "items": [
       "粘贴节点链接或订阅 URL，节点将自动提取",
       "点击生成，即可在你的部署上创建一个实时订阅链接",
-      "将订阅链接填入 Clash for Windows / Mihomo Party / Stash 等客户端"
+      "将订阅链接填入 Clash Verge / Clash Party / Clash Mi 等客户端"
     ],
     "footnote": "规则集由 {acl4ssr} 提供，客户端首次加载时自动下载。"
   },
@@ -65,7 +65,7 @@
     "copied": "已复制",
     "usageTitle": "使用说明",
     "usageItems": [
-      "将订阅链接填入 Clash for Windows / Mihomo Party / Stash 等客户端",
+      "将订阅链接填入 Clash Verge / Clash Party / Clash Mi 等客户端",
       "订阅链接会动态生成最新配置，节点更新后重新生成链接即可",
       "规则组首次加载时由客户端自动下载"
     ],

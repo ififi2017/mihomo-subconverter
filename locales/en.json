@@ -46,7 +46,7 @@
     "items": [
       "Paste proxy links or a subscription URL — nodes are auto-extracted",
       "Click Generate — a live subscription URL is created on your deploy",
-      "Paste the URL into Clash for Windows / Mihomo Party / Stash"
+      "Paste the URL into Clash Verge / Clash Party / Clash Mi"
     ],
     "footnote": "Rule sets are powered by {acl4ssr} and downloaded by your client on first load."
   },
@@ -65,7 +65,7 @@
     "copied": "Copied",
     "usageTitle": "How to use",
     "usageItems": [
-      "Paste the URL into Clash for Windows / Mihomo Party / Stash or any compatible client",
+      "Paste the URL into Clash Verge / Clash Party / Clash Mi or any compatible client",
       "The URL dynamically generates the latest config — re-generate whenever you update your nodes",
       "Rule sets are downloaded automatically by the client on first load"
     ],
