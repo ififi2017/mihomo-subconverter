@@ -3,6 +3,11 @@
     "title": "Mihomo 订阅转换",
     "description": "Clash / Mihomo 订阅链接转换工具，支持 Hysteria2、AnyTLS、VLESS 等协议"
   },
+  "theme": {
+    "auto":  "自动",
+    "light": "浅色",
+    "dark":  "深色"
+  },
   "header": {
     "title": "Mihomo 订阅转换",
     "subtitle": "Clash Meta 配置生成器",

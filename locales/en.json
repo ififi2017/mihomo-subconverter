@@ -3,6 +3,11 @@
     "title": "Mihomo Subscription Converter",
     "description": "Mihomo / Clash Meta config generator supporting Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks"
   },
+  "theme": {
+    "auto":  "Auto",
+    "light": "Light",
+    "dark":  "Dark"
+  },
   "header": {
     "title": "Mihomo Subscription Converter",
     "subtitle": "Clash Meta Config Generator",
