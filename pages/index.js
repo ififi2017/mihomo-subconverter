@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import { useI18n, LOCALES } from '../lib/i18n'
 import { useTheme } from '../lib/theme'
+import pkg from '../package.json'
 
 const LS_KEY          = 'mihomo_proxy_links'
 const LS_KEY_TEMPLATE = 'mihomo_template_url'
@@ -421,9 +422,15 @@ export default function Home() {
             <div className="flex items-center gap-[11px]">
               <LogoMark size={30}/>
               <div>
-                <div className="text-[14px] font-semibold text-gray-900 dark:text-white
-                  leading-tight tracking-tight">
-                  {t('header.title')}
+                <div className="flex items-baseline gap-[6px]">
+                  <span className="text-[14px] font-semibold text-gray-900 dark:text-white
+                    leading-tight tracking-tight">
+                    {t('header.title')}
+                  </span>
+                  <span className="text-[10.5px] font-medium text-gray-300 dark:text-gray-600
+                    tracking-wide select-none">
+                    v{pkg.version}
+                  </span>
                 </div>
                 <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-px tracking-wide">
                   {t('header.subtitle')}
