@@ -621,26 +621,17 @@ export default function Home() {
                     </svg>
                   </span>
                   <span className="text-[13.5px] font-medium text-gray-900 dark:text-white">
-                    Quick Guide
+                    {t('guide.title')}
                   </span>
                 </div>
               </CardHeader>
               <div className="p-[18px]">
                 <ul className="space-y-3">
                   {[
-                    {
-                      icon: <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>,
-                      text: 'Paste proxy links or a subscription URL — nodes are auto-extracted',
-                    },
-                    {
-                      icon: <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd"/>,
-                      text: 'Click Generate — a live subscription URL is created on your deploy',
-                    },
-                    {
-                      icon: <path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>,
-                      text: 'Paste the URL into Clash for Windows / Mihomo Party / Stash',
-                    },
-                  ].map(({ icon, text }, i) => (
+                    <path key="0" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>,
+                    <path key="1" fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd"/>,
+                    <path key="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>,
+                  ].map((icon, i) => (
                     <li key={i} className="flex items-start gap-[10px]">
                       <span className="w-5 h-5 rounded-md bg-blue-50 dark:bg-blue-900/30
                         flex items-center justify-center shrink-0 mt-px">
@@ -649,16 +640,23 @@ export default function Home() {
                           {icon}
                         </svg>
                       </span>
-                      <span className="text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed">{text}</span>
+                      <span className="text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        {t(`guide.items.${i}`)}
+                      </span>
                     </li>
                   ))}
                 </ul>
                 <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                   <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed">
-                    Rule sets are powered by{' '}
-                    <a href="https://github.com/ACL4SSR/ACL4SSR" target="_blank" rel="noopener noreferrer"
-                      className="text-blue-500 dark:text-blue-400 hover:underline">ACL4SSR</a>
-                    {' '}and downloaded by your client on first load.
+                    {t('guide.footnote').split('{acl4ssr}').map((part, i) =>
+                      i === 0 ? part : (
+                        <span key={i}>
+                          <a href="https://github.com/ACL4SSR/ACL4SSR" target="_blank" rel="noopener noreferrer"
+                            className="text-blue-500 dark:text-blue-400 hover:underline">ACL4SSR</a>
+                          {part}
+                        </span>
+                      )
+                    )}
                   </p>
                 </div>
               </div>

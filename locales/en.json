@@ -41,6 +41,15 @@
     "optional": "(optional)",
     "placeholder": "# Custom rules, one per line. These take highest priority.\n# e.g.:\nDOMAIN-SUFFIX,example.com,🚀 节点选择\nIP-CIDR,1.2.3.4/32,DIRECT"
   },
+  "guide": {
+    "title": "Quick Guide",
+    "items": [
+      "Paste proxy links or a subscription URL — nodes are auto-extracted",
+      "Click Generate — a live subscription URL is created on your deploy",
+      "Paste the URL into Clash for Windows / Mihomo Party / Stash"
+    ],
+    "footnote": "Rule sets are powered by {acl4ssr} and downloaded by your client on first load."
+  },
   "generate": {
     "button": "Generate Config",
     "loading": "Generating...",

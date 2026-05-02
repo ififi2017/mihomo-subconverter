@@ -41,6 +41,15 @@
     "optional": "（可选）",
     "placeholder": "# 自定义规则，每行一条，优先于内置规则生效\n# 例如：\nDOMAIN-SUFFIX,example.com,🚀 节点选择\nIP-CIDR,1.2.3.4/32,DIRECT"
   },
+  "guide": {
+    "title": "使用指南",
+    "items": [
+      "粘贴节点链接或订阅 URL，节点将自动提取",
+      "点击生成，即可在你的部署上创建一个实时订阅链接",
+      "将订阅链接填入 Clash for Windows / Mihomo Party / Stash 等客户端"
+    ],
+    "footnote": "规则集由 {acl4ssr} 提供，客户端首次加载时自动下载。"
+  },
   "generate": {
     "button": "生成订阅配置",
     "loading": "生成中...",
