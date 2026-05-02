@@ -13,7 +13,7 @@
     "extractedBadge": "Extracted from subscription URL",
     "nodeCount": "{{count}} nodes",
     "placeholder": "# Paste your proxy links here, one per line:\n# hysteria2://password@host:port?peer=sni&insecure=1#NodeName\n# anytls://password@host:port?peer=sni&insecure=1#NodeName\n# vless://uuid@host:port?security=reality&pbk=xxx&sni=xxx&fp=chrome&sid=xxx#NodeName\n# trojan://password@host:port?sni=xxx#NodeName\n# vmess://base64...\n# ss://method:password@host:port#NodeName",
-    "supported": "Supported protocols:"
+    "supported": "Supported protocols: hysteria2 · anytls · vless · trojan · vmess · ss · tuic"
   },
   "step2": {
     "title": "Rule Groups",

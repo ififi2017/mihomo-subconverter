@@ -13,6 +13,7 @@ const PROTO_COLORS = {
   trojan: 'bg-rose-500/15 text-rose-400 ring-rose-500/20',
   vmess:  'bg-amber-500/15 text-amber-400 ring-amber-500/20',
   ss:     'bg-emerald-500/15 text-emerald-400 ring-emerald-500/20',
+  tuic:   'bg-pink-500/15 text-pink-400 ring-pink-500/20',
 }
 
 export default function Home() {
@@ -37,7 +38,7 @@ export default function Home() {
     } catch { /* 隐私模式下 localStorage 可能不可用 */ }
   }, [])
 
-  const PROXY_PREFIXES = ['hysteria2://', 'hy2://', 'anytls://', 'vless://', 'trojan://', 'vmess://', 'ss://']
+  const PROXY_PREFIXES = ['hysteria2://', 'hy2://', 'anytls://', 'vless://', 'trojan://', 'vmess://', 'ss://', 'tuic://']
 
   const handleProxyInput = useCallback((raw) => {
     const trimmed = raw.trim()
@@ -149,7 +150,8 @@ export default function Home() {
     const PROTO_MAP = {
       'hysteria2://': 'hy2', 'hy2://': 'hy2',
       'anytls://': 'anytls', 'vless://': 'vless',
-      'trojan://': 'trojan', 'vmess://': 'vmess', 'ss://': 'ss',
+      'trojan://': 'trojan', 'vmess://': 'vmess',
+      'ss://': 'ss', 'tuic://': 'tuic',
     }
     const counts = {}
     for (const line of proxyLinks.split('\n')) {

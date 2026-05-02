@@ -13,7 +13,7 @@
     "extractedBadge": "已从订阅链接提取",
     "nodeCount": "{{count}} 条节点",
     "placeholder": "# 粘贴你的节点链接，每行一个，支持以下格式：\n# hysteria2://password@host:port?peer=sni&insecure=1#节点名称\n# anytls://password@host:port?peer=sni&insecure=1#节点名称\n# vless://uuid@host:port?security=reality&pbk=xxx&sni=xxx&fp=chrome&sid=xxx#节点名称\n# trojan://password@host:port?sni=xxx#节点名称\n# vmess://base64...\n# ss://method:password@host:port#节点名称",
-    "supported": "支持协议："
+    "supported": "支持协议：hysteria2 · anytls · vless · trojan · vmess · ss · tuic"
   },
   "step2": {
     "title": "选择规则组",

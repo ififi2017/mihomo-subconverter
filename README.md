@@ -6,13 +6,13 @@
 
 A lightweight Mihomo / Clash Meta subscription converter. Paste your proxy node links, pick your rule groups, and get a ready-to-use configuration file — deployable to Vercel in one click.
 
-> Rule sets are based on [ACL4SSR](https://github.com/ACL4SSR/ACL4SSR). Thanks to for his work.
+> Rule sets are based on [ACL4SSR](https://github.com/ACL4SSR/ACL4SSR). Protocol parsing patterns reference [sublink-worker](https://github.com/7Sageer/sublink-worker) by 7Sageer. Thanks to both projects.
 
 ---
 
 ## Features
 
-- **Multi-protocol support** — Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks
+- **Multi-protocol support** — Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks, TUIC
 - **Subscription URL import** — Paste a subscription URL and nodes are extracted automatically
 - **Visual rule selection** — 16 built-in rule groups, toggle on/off, sensible defaults pre-selected
 - **Custom rules** — Append your own `DOMAIN-SUFFIX` / `IP-CIDR` rules with highest priority
