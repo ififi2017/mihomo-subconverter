@@ -21,11 +21,17 @@
     "supported": "Supported protocols:"
   },
   "step2": {
-    "title": "Rule Template",
-    "optional": "(optional)",
-    "placeholder": "https://example.com/my-template.ini",
-    "description": "Leave empty to use the default ACL4SSR Full template. Compatible with sub-web remote config URLs.",
-    "defaultLabel": "Default: ACL4SSR Full Template"
+    "title": "Rule Groups",
+    "selectAll": "Select All",
+    "clear": "Clear",
+    "loading": "Loading groups...",
+    "loadError": "Failed to load template",
+    "retry": "Retry",
+    "templateLabel": "Custom Template URL",
+    "templateOptional": "(optional)",
+    "templatePlaceholder": "https://example.com/my-template.ini",
+    "templateDescription": "Leave empty for the default ACL4SSR Full template. Compatible with sub-web remote config URLs.",
+    "templateDefault": "Default: ACL4SSR Full Template"
   },
   "step3": {
     "title": "Custom Rules",

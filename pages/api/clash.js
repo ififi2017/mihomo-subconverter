@@ -8,7 +8,7 @@ const DEFAULT_TEMPLATE_URL =
   'https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/ACL4SSR_Online_Full.ini'
 
 export default async function handler(req, res) {
-  const { config, template, customRules } = req.query
+  const { config, template, customRules, groups } = req.query
 
   if (!config) {
     return res.status(400).send('Missing required parameter: config')
@@ -75,8 +75,19 @@ export default async function handler(req, res) {
       }
     }
 
+    // ── Parse selected groups ─────────────────────────────────────────────
+    let selectedGroups = null   // null = include all
+    if (groups) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(groups))
+        if (Array.isArray(parsed)) selectedGroups = new Set(parsed)
+      } catch {
+        // malformed → include all
+      }
+    }
+
     // ── Generate YAML ─────────────────────────────────────────────────────
-    const yaml = generateClashConfigFromIni(proxies, parsedIni, customRulesList, templateUrl)
+    const yaml = generateClashConfigFromIni(proxies, parsedIni, customRulesList, templateUrl, selectedGroups)
 
     res.setHeader('Content-Type', 'application/x-yaml; charset=utf-8')
     res.setHeader('Content-Disposition', 'attachment; filename=clash.yaml')

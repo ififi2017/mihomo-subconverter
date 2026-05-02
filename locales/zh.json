@@ -21,11 +21,17 @@
     "supported": "支持协议："
   },
   "step2": {
-    "title": "规则模板",
-    "optional": "（可选）",
-    "placeholder": "https://example.com/my-template.ini",
-    "description": "留空使用默认模板（ACL4SSR Full）。兼容 sub-web 远程配置链接。",
-    "defaultLabel": "默认：ACL4SSR Full 模板"
+    "title": "选择规则组",
+    "selectAll": "全选",
+    "clear": "清空",
+    "loading": "加载规则组中...",
+    "loadError": "模板加载失败",
+    "retry": "重试",
+    "templateLabel": "自定义模板链接",
+    "templateOptional": "（可选）",
+    "templatePlaceholder": "https://example.com/my-template.ini",
+    "templateDescription": "留空使用默认模板（ACL4SSR Full）。兼容 sub-web 远程配置链接。",
+    "templateDefault": "默认：ACL4SSR Full 模板"
   },
   "step3": {
     "title": "自定义规则",

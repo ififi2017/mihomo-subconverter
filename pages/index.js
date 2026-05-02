@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import { useI18n, LOCALES } from '../lib/i18n'
 import { useTheme } from '../lib/theme'
@@ -47,18 +47,22 @@ export default function Home() {
   const { t, locale, setLocale } = useI18n()
   const { theme, setTheme }      = useTheme()
 
-  const [proxyLinks,  setProxyLinks]  = useState('')
-  const [templateUrl, setTemplateUrl] = useState('')
-  const [customRules, setCustomRules] = useState('')
-  const [subUrl,      setSubUrl]      = useState('')
-  const [yamlPreview, setYamlPreview] = useState('')
-  const [loading,     setLoading]     = useState(false)
-  const [error,       setError]       = useState('')
-  const [copied,      setCopied]      = useState('')
-  const [activeTab,   setActiveTab]   = useState('url')
-  const [extractedFrom, setExtractedFrom] = useState('')
+  const [proxyLinks,     setProxyLinks]     = useState('')
+  const [templateUrl,    setTemplateUrl]    = useState('')
+  const [ruleGroups,     setRuleGroups]     = useState([])    // group names from template
+  const [selectedGroups, setSelectedGroups] = useState(null)  // null = loading/all
+  const [groupsLoading,  setGroupsLoading]  = useState(false)
+  const [groupsError,    setGroupsError]    = useState('')
+  const [customRules,    setCustomRules]    = useState('')
+  const [subUrl,         setSubUrl]         = useState('')
+  const [yamlPreview,    setYamlPreview]    = useState('')
+  const [loading,        setLoading]        = useState(false)
+  const [error,          setError]          = useState('')
+  const [copied,         setCopied]         = useState('')
+  const [activeTab,      setActiveTab]      = useState('url')
+  const [extractedFrom,  setExtractedFrom]  = useState('')
 
-  // Restore persisted values
+  // ── Restore persisted values ───────────────────────────────────────────
   useEffect(() => {
     try {
       const savedLinks    = localStorage.getItem(LS_KEY)
@@ -68,6 +72,53 @@ export default function Home() {
     } catch { }
   }, [])
 
+  // ── Fetch rule groups from template (debounced) ────────────────────────
+  const debounceRef = useRef(null)
+
+  const fetchGroups = useCallback((url) => {
+    setGroupsLoading(true)
+    setGroupsError('')
+    const params = new URLSearchParams()
+    if (url?.trim()) params.set('url', url.trim())
+    fetch(`/api/preview-template?${params}`)
+      .then(r => r.json())
+      .then(({ groups, error }) => {
+        if (error && (!groups || groups.length === 0)) {
+          setGroupsError(error)
+          setRuleGroups([])
+          setSelectedGroups(new Set())
+        } else {
+          setRuleGroups(groups)
+          setSelectedGroups(new Set(groups))  // default: all selected
+          setGroupsError('')
+        }
+      })
+      .catch(e => {
+        setGroupsError(e.message)
+        setRuleGroups([])
+        setSelectedGroups(new Set())
+      })
+      .finally(() => setGroupsLoading(false))
+  }, [])
+
+  // Initial load using the restored / default template
+  const didInitialLoad = useRef(false)
+  useEffect(() => {
+    if (didInitialLoad.current) return
+    didInitialLoad.current = true
+    fetchGroups(templateUrl)
+  }, [templateUrl, fetchGroups])
+
+  // Re-fetch when template URL changes (debounced 800 ms)
+  const isFirstTemplateChange = useRef(true)
+  useEffect(() => {
+    if (isFirstTemplateChange.current) { isFirstTemplateChange.current = false; return }
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => fetchGroups(templateUrl), 800)
+    return () => clearTimeout(debounceRef.current)
+  }, [templateUrl, fetchGroups])
+
+  // ── Proxy link helpers ─────────────────────────────────────────────────
   const PROXY_PREFIXES = ['hysteria2://', 'hy2://', 'anytls://', 'vless://', 'trojan://', 'vmess://', 'ss://', 'tuic://']
 
   const handleProxyInput = useCallback((raw) => {
@@ -102,6 +153,15 @@ export default function Home() {
     try { localStorage.setItem(LS_KEY_TEMPLATE, val) } catch { }
   }, [])
 
+  const toggleGroup = useCallback((name) => {
+    setSelectedGroups(prev => {
+      const next = new Set(prev)
+      next.has(name) ? next.delete(name) : next.add(name)
+      return next
+    })
+  }, [])
+
+  // ── Build API URL ──────────────────────────────────────────────────────
   const buildApiUrl = useCallback((base) => {
     const links = proxyLinks.trim().split('\n')
       .filter(l => l.trim() && !l.trim().startsWith('#'))
@@ -114,13 +174,20 @@ export default function Home() {
     const tpl = templateUrl.trim()
     if (tpl) params.set('template', tpl)
 
+    // Only pass groups if the user has deselected at least one
+    if (selectedGroups !== null && ruleGroups.length > 0 &&
+        selectedGroups.size < ruleGroups.length) {
+      params.set('groups', JSON.stringify(Array.from(selectedGroups)))
+    }
+
     const customList = customRules.trim().split('\n')
       .filter(l => l.trim() && !l.trim().startsWith('#'))
     if (customList.length > 0) params.set('customRules', JSON.stringify(customList))
 
     return `${base}/api/clash?${params.toString()}`
-  }, [proxyLinks, templateUrl, customRules])
+  }, [proxyLinks, templateUrl, selectedGroups, ruleGroups, customRules])
 
+  // ── Generate ───────────────────────────────────────────────────────────
   const handleGenerate = useCallback(async () => {
     const links = proxyLinks.trim().split('\n')
       .filter(l => l.trim() && !l.trim().startsWith('#'))
@@ -154,6 +221,7 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handler)
   }, [handleGenerate])
 
+  // ── Clipboard / download ───────────────────────────────────────────────
   const copyToClipboard = useCallback(async (text, key) => {
     try {
       await navigator.clipboard.writeText(text)
@@ -175,12 +243,13 @@ export default function Home() {
     URL.revokeObjectURL(url)
   }, [yamlPreview])
 
+  // ── Protocol breakdown ─────────────────────────────────────────────────
   const analyzeProxies = () => {
     const PROTO_MAP = {
       'hysteria2://': 'hy2', 'hy2://': 'hy2',
-      'anytls://':   'anytls', 'vless://': 'vless',
-      'trojan://':   'trojan', 'vmess://': 'vmess',
-      'ss://':       'ss',     'tuic://':  'tuic',
+      'anytls://': 'anytls', 'vless://': 'vless',
+      'trojan://': 'trojan', 'vmess://': 'vmess',
+      'ss://': 'ss', 'tuic://': 'tuic',
     }
     const counts = {}
     for (const line of proxyLinks.split('\n')) {
@@ -190,13 +259,15 @@ export default function Home() {
         if (l.startsWith(prefix)) { counts[proto] = (counts[proto] || 0) + 1; break }
       }
     }
-    const total = Object.values(counts).reduce((a, b) => a + b, 0)
-    return { total, breakdown: Object.entries(counts) }
+    return {
+      total:     Object.values(counts).reduce((a, b) => a + b, 0),
+      breakdown: Object.entries(counts),
+    }
   }
 
   const { total, breakdown } = analyzeProxies()
 
-  // Shared class fragments
+  // ── Shared class fragments ─────────────────────────────────────────────
   const card     = 'bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden'
   const cardHdr  = 'px-5 py-4 border-b border-gray-200 dark:border-gray-800'
   const pill     = 'bg-gray-100 dark:bg-gray-800 rounded-lg p-1'
@@ -213,7 +284,8 @@ export default function Home() {
       </Head>
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-        {/* Header */}
+
+        {/* ── Header ── */}
         <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
           <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -224,35 +296,23 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* Theme switcher */}
               <div className={pill}>
                 {THEME_OPTIONS.map(({ key, icon }) => (
-                  <button
-                    key={key}
-                    onClick={() => setTheme(key)}
-                    title={t(`theme.${key}`)}
-                    className={pillBtn(theme === key)}
-                  >
+                  <button key={key} onClick={() => setTheme(key)} title={t(`theme.${key}`)} className={pillBtn(theme === key)}>
                     {icon}
                   </button>
                 ))}
               </div>
-              {/* Language switcher */}
               <div className={pill}>
                 {Object.entries(LOCALES).map(([key, { name }]) => (
-                  <button
-                    key={key}
-                    onClick={() => setLocale(key)}
-                    className={pillBtn(locale === key)}
-                  >
+                  <button key={key} onClick={() => setLocale(key)} className={pillBtn(locale === key)}>
                     {name}
                   </button>
                 ))}
               </div>
               <a
                 href="https://github.com/ACL4SSR/ACL4SSR"
-                target="_blank"
-                rel="noopener noreferrer"
+                target="_blank" rel="noopener noreferrer"
                 className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors hidden sm:block"
               >
                 {t('header.credit')}
@@ -263,7 +323,7 @@ export default function Home() {
 
         <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
-          {/* Step 1: Proxy Links */}
+          {/* ── Step 1: Proxy Links ── */}
           <section className={card}>
             <div className={`${cardHdr} flex items-center justify-between`}>
               <div className="flex items-center gap-3">
@@ -326,38 +386,108 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Step 2: Rule Template */}
+          {/* ── Step 2: Rule Groups ── */}
           <section className={card}>
-            <div className={cardHdr}>
+            {/* Card header */}
+            <div className={`${cardHdr} flex items-center justify-between`}>
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-blue-600 text-xs flex items-center justify-center font-bold text-white">2</span>
-                <h2 className="font-medium text-gray-900 dark:text-white">
-                  {t('step2.title')}
-                  <span className="text-xs text-gray-400 dark:text-gray-500 font-normal ml-2">{t('step2.optional')}</span>
-                </h2>
+                <h2 className="font-medium text-gray-900 dark:text-white">{t('step2.title')}</h2>
               </div>
+              {!groupsLoading && ruleGroups.length > 0 && selectedGroups && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedGroups(new Set(ruleGroups))}
+                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  >
+                    {t('step2.selectAll')}
+                  </button>
+                  <span className="text-gray-300 dark:text-gray-700">·</span>
+                  <button
+                    onClick={() => setSelectedGroups(new Set())}
+                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  >
+                    {t('step2.clear')}
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="p-4 space-y-2">
+
+            {/* Template URL sub-row */}
+            <div className="px-4 pt-3 pb-2 border-b border-gray-100 dark:border-gray-800/60 flex items-center gap-2">
+              <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap shrink-0">
+                {t('step2.templateLabel')}
+                <span className="ml-1 opacity-60">{t('step2.templateOptional')}</span>
+              </span>
               <input
                 type="url"
                 value={templateUrl}
                 onChange={e => handleTemplateInput(e.target.value)}
-                placeholder={t('step2.placeholder')}
-                className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm font-mono text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                placeholder={t('step2.templatePlaceholder')}
+                className="flex-1 min-w-0 bg-transparent text-xs font-mono text-gray-700 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600 focus:outline-none"
                 spellCheck={false}
               />
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                {t('step2.description')}
-                {!templateUrl && (
-                  <span className="ml-1 inline-flex items-center gap-1 text-gray-400 dark:text-gray-500">
-                    · <span className="italic">{t('step2.defaultLabel')}</span>
-                  </span>
-                )}
-              </p>
+              {!templateUrl && (
+                <span className="text-[11px] text-gray-300 dark:text-gray-600 whitespace-nowrap shrink-0 italic hidden sm:block">
+                  {t('step2.templateDefault')}
+                </span>
+              )}
+            </div>
+
+            {/* Groups area */}
+            <div className="p-4">
+              {groupsLoading ? (
+                <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 py-4 justify-center">
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  {t('step2.loading')}
+                </div>
+              ) : groupsError ? (
+                <div className="flex items-center gap-3 py-3 text-sm text-red-500 dark:text-red-400">
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className="flex-1">{t('step2.loadError')}: {groupsError}</span>
+                  <button
+                    onClick={() => fetchGroups(templateUrl)}
+                    className="text-xs underline underline-offset-2 hover:no-underline"
+                  >
+                    {t('step2.retry')}
+                  </button>
+                </div>
+              ) : ruleGroups.length === 0 ? null : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {ruleGroups.map(group => {
+                    const checked = selectedGroups?.has(group) ?? true
+                    return (
+                      <label
+                        key={group}
+                        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg border cursor-pointer transition-all ${
+                          checked
+                            ? 'bg-blue-50 dark:bg-blue-600/10 border-blue-400 dark:border-blue-500/50'
+                            : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleGroup(group)}
+                          className="mt-px accent-blue-500 shrink-0"
+                        />
+                        <span className={`text-sm truncate ${checked ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                          {group}
+                        </span>
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </section>
 
-          {/* Step 3: Custom Rules */}
+          {/* ── Step 3: Custom Rules ── */}
           <section className={card}>
             <div className={cardHdr}>
               <div className="flex items-center gap-3">
@@ -380,7 +510,7 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Generate Button */}
+          {/* ── Generate Button ── */}
           <div className="flex justify-center">
             <button
               onClick={handleGenerate}
@@ -407,14 +537,14 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Error */}
+          {/* ── Error ── */}
           {error && (
             <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700/50 rounded-xl px-5 py-4 text-red-600 dark:text-red-400 text-sm">
               {error}
             </div>
           )}
 
-          {/* Result */}
+          {/* ── Result ── */}
           {(subUrl || yamlPreview) && (
             <section className={card}>
               <div className={`${cardHdr} flex items-center justify-between`}>
