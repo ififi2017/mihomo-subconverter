@@ -488,28 +488,48 @@ export default function Home() {
             </CardHeader>
 
             {/* Template URL sub-row */}
-            <div className="px-[18px] pt-3 pb-2 border-b border-gray-50 dark:border-gray-800/60
-              flex items-center gap-2">
-              <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 whitespace-nowrap">
-                {t('step2.templateLabel')}
-                <span className="ml-1 opacity-60">{t('step2.templateOptional')}</span>
-              </span>
-              <input
-                type="url"
-                value={templateUrl}
-                onChange={e => handleTemplateInput(e.target.value)}
-                placeholder={t('step2.templatePlaceholder')}
-                className="flex-1 min-w-0 bg-transparent text-[11.5px] font-mono
-                  text-gray-600 dark:text-gray-300
-                  placeholder-gray-300 dark:placeholder-gray-600
-                  focus:outline-none"
-                spellCheck={false}
-              />
-              {!templateUrl && (
-                <span className="text-[11px] text-gray-300 dark:text-gray-600 shrink-0 italic hidden sm:block">
-                  {t('step2.templateDefault')}
+            <div className="px-[18px] pt-3 pb-3 border-b border-gray-50 dark:border-gray-800/60">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 whitespace-nowrap">
+                  {t('step2.templateLabel')}
+                  <span className="ml-1 opacity-60">{t('step2.templateOptional')}</span>
                 </span>
-              )}
+                <input
+                  type="url"
+                  value={templateUrl}
+                  onChange={e => handleTemplateInput(e.target.value)}
+                  placeholder={t('step2.templatePlaceholder')}
+                  className="flex-1 min-w-0 bg-transparent text-[11.5px] font-mono
+                    text-gray-600 dark:text-gray-300
+                    placeholder-gray-300 dark:placeholder-gray-600
+                    focus:outline-none"
+                  spellCheck={false}
+                />
+                {!templateUrl && (
+                  <span className="text-[11px] text-gray-300 dark:text-gray-600 shrink-0 italic hidden sm:block">
+                    {t('step2.templateDefault')}
+                  </span>
+                )}
+              </div>
+              {/* Description: sub-web compat note + example link */}
+              <p className="mt-[7px] text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed flex flex-wrap items-baseline gap-x-1">
+                <span>{t('step2.templateDescription')}</span>
+                <a href="https://sub-web.pages.dev/" target="_blank" rel="noopener noreferrer"
+                  className="text-blue-500 dark:text-blue-400 hover:underline">
+                  {t('step2.templateDescriptionSubweb')}
+                </a>
+                <span>{t('step2.templateDescriptionSuffix')}</span>
+                <span className="text-gray-300 dark:text-gray-700">·</span>
+                <a href="https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/ACL4SSR_Online_Full.ini"
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-blue-500 dark:text-blue-400 hover:underline">
+                  {t('step2.templateViewExample')}
+                  <svg width="9" height="9" viewBox="0 0 20 20" fill="currentColor" style={{ display: 'inline', marginLeft: 2, marginBottom: 1 }}>
+                    <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
+                    <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
+                  </svg>
+                </a>
+              </p>
             </div>
 
             {/* Groups */}

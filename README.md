@@ -57,17 +57,24 @@ Open http://localhost:3000
 
 ## Rule Templates
 
-The converter uses an ACL4SSR-style INI file to define proxy groups and rule sets. The default template is:
+The converter uses an ACL4SSR-style INI file to define proxy groups and rule sets.
+
+**Default template** (used when the Custom Template URL field is left empty):
 
 ```
 https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/ACL4SSR_Online_Full.ini
 ```
 
+Open the link above to see a working example of the expected format — it's a good starting point for writing your own template.
+
 ### Using a custom template
 
-You can host your own `.ini` file on GitHub (raw URL), any CDN, or a static file server, then paste the URL into the **Rule Template** field in the UI.
+1. Copy the default template above as a starting point
+2. Edit the `custom_proxy_group` and `ruleset` lines to suit your needs
+3. Host the file on GitHub (raw URL), any CDN, or a static file server
+4. Paste the URL into the **Custom Template URL** field in the UI
 
-The template format follows the ACL4SSR / sub-web convention — any remote config URL that works in [CareyWang/sub-web](https://github.com/CareyWang/sub-web) will work here too.
+**sub-web compatibility:** The template format follows the ACL4SSR / sub-web INI convention — any remote config URL that works in [CareyWang/sub-web](https://sub-web.pages.dev/) ([GitHub](https://github.com/CareyWang/sub-web)) under "远程配置" will also work here without modification.
 
 ### Template format reference
 

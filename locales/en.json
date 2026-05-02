@@ -30,7 +30,10 @@
     "templateLabel": "Custom Template URL",
     "templateOptional": "(optional)",
     "templatePlaceholder": "https://example.com/my-template.ini",
-    "templateDescription": "Leave empty for the default ACL4SSR Full template. Compatible with sub-web remote config URLs.",
+    "templateDescription": "Leave empty for the default ACL4SSR Full template. Compatible with",
+    "templateDescriptionSubweb": "sub-web remote config",
+    "templateDescriptionSuffix": "URLs.",
+    "templateViewExample": "View example template",
     "templateDefault": "Default: ACL4SSR Full Template"
   },
   "step3": {
