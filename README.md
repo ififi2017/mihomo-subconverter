@@ -18,6 +18,7 @@ A lightweight Mihomo / Clash Meta subscription converter. Paste your proxy node 
 - **Custom rules** — Append your own `DOMAIN-SUFFIX` / `IP-CIDR` rules with highest priority
 - **Subscription link output** — Generates a URL you can paste directly into any Mihomo-compatible client
 - **Custom domain aware** — Bind a custom domain in Vercel; generated links automatically use it
+- **i18n** — UI available in English and Chinese; adding a new language takes two steps (see below)
 - **Zero-config deploy** — No environment variables needed, just import and deploy
 
 ---
@@ -70,6 +71,32 @@ GET /api/clash?config=<encoded_links>[&rules=<rule_ids>][&customRules=<json_arra
 ```bash
 curl "https://your-domain.vercel.app/api/clash?config=hysteria2%3A%2F%2Fpwd%40host%3A443%3Fpeer%3Dsni%23MyNode"
 ```
+
+---
+
+## Adding a New Language
+
+Translations live in the `locales/` directory as plain JSON files. Adding a new language requires two steps:
+
+**1. Create the translation file**
+
+Copy `locales/en.json` to `locales/<lang>.json` (use a [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag) language code, e.g. `ja`, `ko`, `fr`) and translate the values.
+
+**2. Register the language**
+
+In `lib/i18n.js`, add two lines:
+
+```js
+import ja from '../locales/ja.json'          // 1. import the file
+
+export const LOCALES = {
+  en: { name: 'English', messages: en },
+  zh: { name: '中文',    messages: zh },
+  ja: { name: '日本語',  messages: ja },     // 2. register it here
+}
+```
+
+That's it — the language switcher in the header will pick it up automatically. PRs are welcome!
 
 ---
 
