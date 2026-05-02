@@ -2,7 +2,7 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ififi2017/mihomo-subconverter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org)
 
 A lightweight Mihomo / Clash Meta subscription converter. Paste your proxy node links, pick your rule groups, and get a ready-to-use configuration file — deployable to Vercel in one click.
 
