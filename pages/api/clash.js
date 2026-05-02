@@ -35,7 +35,6 @@ export default function handler(req, res) {
     res.setHeader('Content-Type', 'application/x-yaml; charset=utf-8')
     res.setHeader('Content-Disposition', 'attachment; filename="clash.yaml"')
     res.setHeader('Cache-Control', 'no-store')
-    res.setHeader('Subscription-Userinfo', 'upload=0; download=0; total=107374182400; expire=4102329600')
     return res.status(200).send(yaml)
   } catch (err) {
     console.error('Generation error:', err)
