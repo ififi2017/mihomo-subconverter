@@ -21,9 +21,11 @@
     "supported": "支持协议："
   },
   "step2": {
-    "title": "选择规则组",
-    "selectAll": "全选",
-    "clear": "清空"
+    "title": "规则模板",
+    "optional": "（可选）",
+    "placeholder": "https://example.com/my-template.ini",
+    "description": "留空使用默认模板（ACL4SSR Full）。兼容 sub-web 远程配置链接。",
+    "defaultLabel": "默认：ACL4SSR Full 模板"
   },
   "step3": {
     "title": "自定义规则",
@@ -47,40 +49,10 @@
     "usageItems": [
       "将订阅链接填入 Clash for Windows / Mihomo Party / Stash 等客户端",
       "订阅链接会动态生成最新配置，节点更新后重新生成链接即可",
-      "规则组使用 ACL4SSR 规则，客户端首次加载时会自动下载"
+      "规则组首次加载时由客户端自动下载"
     ],
     "yamlLines": "{{count}} 行配置",
     "download": "下载 clash.yaml"
   },
-  "protocolRef": {
-    "title": "节点链接格式参考",
-    "fields": {
-      "hysteria2": "sni: SNI 域名 · insecure: 跳过证书验证 · obfs / obfs-password: 混淆",
-      "anytls": "sni: SNI 域名 · insecure: 跳过证书验证 · fastopen: TCP 快速打开 · fp: 指纹",
-      "vless": "security: tls / reality · pbk: 公钥 · sid: shortId · sni: SNI · fp: 指纹 · flow: xtls-rprx-vision",
-      "trojan": "sni: SNI 域名 · insecure: 跳过证书验证 · fp: 指纹",
-      "vmess": "JSON 字段：add, port, id, aid, scy, net, tls, sni, host, path",
-      "ss": "支持 SIP002（BASE64 用户信息）和传统全量 BASE64 格式 · plugin: obfs / v2ray-plugin",
-      "tuic": "alpn: h3（推荐）· congestion-control: bbr / cubic · udp-relay-mode: native / quic"
-    }
-  },
-  "footer": "Mihomo Subconverter · 仅供个人使用",
-  "rules": {
-    "BanAD":        { "label": "🛑 广告拦截",  "description": "广告拦截 + 应用净化" },
-    "GoogleFCM":    { "label": "📢 谷歌FCM",   "description": "Google Firebase 推送" },
-    "Microsoft":    { "label": "Ⓜ️ 微软服务", "description": "OneDrive + Microsoft 全系列" },
-    "Apple":        { "label": "🍎 苹果服务",  "description": "Apple 全系列" },
-    "Telegram":     { "label": "📲 电报消息",  "description": "Telegram" },
-    "OpenAI":       { "label": "💬 OpenAI",    "description": "ChatGPT / OpenAI" },
-    "NewBing":      { "label": "🤖 NewBing",   "description": "Microsoft Bing AI" },
-    "NetEaseMusic": { "label": "🎶 网易音乐",  "description": "网易云音乐" },
-    "Gaming":       { "label": "🎮 游戏平台",  "description": "EA / Epic / Origin / Sony / Steam / Nintendo" },
-    "TikTok":       { "label": "🎵 TikTok",    "description": "TikTok" },
-    "YouTube":      { "label": "📹 油管视频",  "description": "YouTube" },
-    "Netflix":      { "label": "🎥 奈飞视频",  "description": "Netflix" },
-    "Bahamut":      { "label": "📺 巴哈姆特",  "description": "巴哈姆特动画" },
-    "Bilibili":     { "label": "📺 哔哩哔哩",  "description": "B站" },
-    "ChinaMedia":   { "label": "🌏 国内媒体",  "description": "国内流媒体" },
-    "ForeignMedia": { "label": "🌍 国外媒体",  "description": "海外流媒体（YouTube/Netflix 之外）" }
-  }
+  "footer": "Mihomo Subconverter · 仅供个人使用"
 }

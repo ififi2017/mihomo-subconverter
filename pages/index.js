@@ -1,11 +1,10 @@
 import { useState, useCallback, useEffect } from 'react'
 import Head from 'next/head'
-import { RULE_GROUPS } from '../lib/rules'
 import { useI18n, LOCALES } from '../lib/i18n'
 import { useTheme } from '../lib/theme'
 
-const DEFAULT_RULES = RULE_GROUPS.filter(g => g.default).map(g => g.id)
-const LS_KEY = 'mihomo_proxy_links'
+const LS_KEY          = 'mihomo_proxy_links'
+const LS_KEY_TEMPLATE = 'mihomo_template_url'
 
 const PROTO_COLORS = {
   hy2:    'bg-violet-500/15 text-violet-500 dark:text-violet-400 ring-violet-500/20',
@@ -46,23 +45,26 @@ const THEME_OPTIONS = [
 
 export default function Home() {
   const { t, locale, setLocale } = useI18n()
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme }      = useTheme()
 
-  const [proxyLinks, setProxyLinks] = useState('')
-  const [selectedRules, setSelectedRules] = useState(new Set(DEFAULT_RULES))
+  const [proxyLinks,  setProxyLinks]  = useState('')
+  const [templateUrl, setTemplateUrl] = useState('')
   const [customRules, setCustomRules] = useState('')
-  const [subUrl, setSubUrl] = useState('')
+  const [subUrl,      setSubUrl]      = useState('')
   const [yamlPreview, setYamlPreview] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [copied, setCopied] = useState('')
-  const [activeTab, setActiveTab] = useState('url')
+  const [loading,     setLoading]     = useState(false)
+  const [error,       setError]       = useState('')
+  const [copied,      setCopied]      = useState('')
+  const [activeTab,   setActiveTab]   = useState('url')
   const [extractedFrom, setExtractedFrom] = useState('')
 
+  // Restore persisted values
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(LS_KEY)
-      if (saved) setProxyLinks(saved)
+      const savedLinks    = localStorage.getItem(LS_KEY)
+      const savedTemplate = localStorage.getItem(LS_KEY_TEMPLATE)
+      if (savedLinks)    setProxyLinks(savedLinks)
+      if (savedTemplate) setTemplateUrl(savedTemplate)
     } catch { }
   }, [])
 
@@ -72,11 +74,11 @@ export default function Home() {
     const trimmed = raw.trim()
     if (/^https?:\/\//.test(trimmed) && !trimmed.includes('\n')) {
       try {
-        const url = new URL(trimmed)
+        const url    = new URL(trimmed)
         const config = url.searchParams.get('config')
         if (config) {
           const decoded = decodeURIComponent(config)
-          const lines = decoded.split(/\n|\|/).map(l => l.trim()).filter(l =>
+          const lines   = decoded.split(/\n|\|/).map(l => l.trim()).filter(l =>
             PROXY_PREFIXES.some(p => l.startsWith(p))
           )
           if (lines.length > 0) {
@@ -95,12 +97,9 @@ export default function Home() {
     setExtractedFrom('')
   }, [])
 
-  const toggleRule = useCallback((id) => {
-    setSelectedRules(prev => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
+  const handleTemplateInput = useCallback((val) => {
+    setTemplateUrl(val)
+    try { localStorage.setItem(LS_KEY_TEMPLATE, val) } catch { }
   }, [])
 
   const buildApiUrl = useCallback((base) => {
@@ -108,13 +107,19 @@ export default function Home() {
       .filter(l => l.trim() && !l.trim().startsWith('#'))
       .join('\n')
     if (!links) return null
+
     const params = new URLSearchParams()
     params.set('config', links)
-    if (selectedRules.size > 0) params.set('rules', Array.from(selectedRules).join(','))
-    const customList = customRules.trim().split('\n').filter(l => l.trim() && !l.trim().startsWith('#'))
+
+    const tpl = templateUrl.trim()
+    if (tpl) params.set('template', tpl)
+
+    const customList = customRules.trim().split('\n')
+      .filter(l => l.trim() && !l.trim().startsWith('#'))
     if (customList.length > 0) params.set('customRules', JSON.stringify(customList))
+
     return `${base}/api/clash?${params.toString()}`
-  }, [proxyLinks, selectedRules, customRules])
+  }, [proxyLinks, templateUrl, customRules])
 
   const handleGenerate = useCallback(async () => {
     const links = proxyLinks.trim().split('\n')
@@ -164,8 +169,8 @@ export default function Home() {
   const downloadYaml = useCallback(() => {
     if (!yamlPreview) return
     const blob = new Blob([yamlPreview], { type: 'application/x-yaml' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
     a.href = url; a.download = 'clash.yaml'; a.click()
     URL.revokeObjectURL(url)
   }, [yamlPreview])
@@ -173,9 +178,9 @@ export default function Home() {
   const analyzeProxies = () => {
     const PROTO_MAP = {
       'hysteria2://': 'hy2', 'hy2://': 'hy2',
-      'anytls://': 'anytls', 'vless://': 'vless',
-      'trojan://': 'trojan', 'vmess://': 'vmess',
-      'ss://': 'ss', 'tuic://': 'tuic',
+      'anytls://':   'anytls', 'vless://': 'vless',
+      'trojan://':   'trojan', 'vmess://': 'vmess',
+      'ss://':       'ss',     'tuic://':  'tuic',
     }
     const counts = {}
     for (const line of proxyLinks.split('\n')) {
@@ -192,10 +197,10 @@ export default function Home() {
   const { total, breakdown } = analyzeProxies()
 
   // Shared class fragments
-  const card    = 'bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden'
-  const cardHdr = 'px-5 py-4 border-b border-gray-200 dark:border-gray-800'
-  const pill    = 'bg-gray-100 dark:bg-gray-800 rounded-lg p-1'
-  const pillBtn = (active) => `px-3 py-1 text-xs rounded-md transition-colors ${active ? 'bg-blue-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`
+  const card     = 'bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden'
+  const cardHdr  = 'px-5 py-4 border-b border-gray-200 dark:border-gray-800'
+  const pill     = 'bg-gray-100 dark:bg-gray-800 rounded-lg p-1'
+  const pillBtn  = (active) => `px-3 py-1 text-xs rounded-md transition-colors ${active ? 'bg-blue-600 text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`
   const textarea = 'w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-sm font-mono text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-y'
 
   return (
@@ -321,47 +326,34 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Step 2: Rule Groups */}
+          {/* Step 2: Rule Template */}
           <section className={card}>
-            <div className={`${cardHdr} flex items-center justify-between`}>
+            <div className={cardHdr}>
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-blue-600 text-xs flex items-center justify-center font-bold text-white">2</span>
-                <h2 className="font-medium text-gray-900 dark:text-white">{t('step2.title')}</h2>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => setSelectedRules(new Set(RULE_GROUPS.map(g => g.id)))} className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                  {t('step2.selectAll')}
-                </button>
-                <span className="text-gray-300 dark:text-gray-700">·</span>
-                <button onClick={() => setSelectedRules(new Set())} className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                  {t('step2.clear')}
-                </button>
+                <h2 className="font-medium text-gray-900 dark:text-white">
+                  {t('step2.title')}
+                  <span className="text-xs text-gray-400 dark:text-gray-500 font-normal ml-2">{t('step2.optional')}</span>
+                </h2>
               </div>
             </div>
-            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {RULE_GROUPS.map(group => (
-                <label
-                  key={group.id}
-                  className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                    selectedRules.has(group.id)
-                      ? 'bg-blue-50 dark:bg-blue-600/10 border-blue-400 dark:border-blue-500/50'
-                      : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedRules.has(group.id)}
-                    onChange={() => toggleRule(group.id)}
-                    className="mt-0.5 accent-blue-500"
-                  />
-                  <div className="min-w-0">
-                    <div className={`text-sm font-medium truncate ${selectedRules.has(group.id) ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
-                      {t(`rules.${group.id}.label`)}
-                    </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5">{t(`rules.${group.id}.description`)}</div>
-                  </div>
-                </label>
-              ))}
+            <div className="p-4 space-y-2">
+              <input
+                type="url"
+                value={templateUrl}
+                onChange={e => handleTemplateInput(e.target.value)}
+                placeholder={t('step2.placeholder')}
+                className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm font-mono text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                spellCheck={false}
+              />
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                {t('step2.description')}
+                {!templateUrl && (
+                  <span className="ml-1 inline-flex items-center gap-1 text-gray-400 dark:text-gray-500">
+                    · <span className="italic">{t('step2.defaultLabel')}</span>
+                  </span>
+                )}
+              </p>
             </div>
           </section>
 
@@ -428,7 +420,7 @@ export default function Home() {
               <div className={`${cardHdr} flex items-center justify-between`}>
                 <h2 className="font-medium text-gray-900 dark:text-white">{t('result.title')}</h2>
                 <div className={pill}>
-                  <button onClick={() => setActiveTab('url')} className={pillBtn(activeTab === 'url')}>{t('result.tabUrl')}</button>
+                  <button onClick={() => setActiveTab('url')}  className={pillBtn(activeTab === 'url')} >{t('result.tabUrl')}</button>
                   <button onClick={() => setActiveTab('yaml')} className={pillBtn(activeTab === 'yaml')}>{t('result.tabYaml')}</button>
                 </div>
               </div>

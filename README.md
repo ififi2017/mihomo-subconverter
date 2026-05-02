@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
 
-A lightweight Mihomo / Clash Meta subscription converter. Paste your proxy node links, pick your rule groups, and get a ready-to-use configuration file — deployable to Vercel in one click.
+A lightweight Mihomo / Clash Meta subscription converter. Paste your proxy node links, choose a rule template, and get a ready-to-use configuration file — deployable to Vercel in one click.
 
 > Rule sets are based on [ACL4SSR](https://github.com/ACL4SSR/ACL4SSR). Protocol parsing patterns reference [sublink-worker](https://github.com/7Sageer/sublink-worker) by 7Sageer. Thanks to both projects.
 
@@ -14,7 +14,8 @@ A lightweight Mihomo / Clash Meta subscription converter. Paste your proxy node 
 
 - **Multi-protocol support** — Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks, TUIC
 - **Subscription URL import** — Paste a subscription URL and nodes are extracted automatically
-- **Visual rule selection** — 16 built-in rule groups, toggle on/off, sensible defaults pre-selected
+- **INI rule templates** — Use the built-in ACL4SSR Full template or point to any compatible `.ini` file
+- **sub-web compatible** — Template URLs are compatible with [CareyWang/sub-web](https://github.com/CareyWang/sub-web) remote config links
 - **Custom rules** — Append your own `DOMAIN-SUFFIX` / `IP-CIDR` rules with highest priority
 - **Subscription link output** — Generates a URL you can paste directly into any Mihomo-compatible client
 - **Custom domain aware** — Bind a custom domain in Vercel; generated links automatically use it
@@ -47,23 +48,72 @@ Open http://localhost:3000
 ## Usage
 
 1. **Paste nodes** — Add proxy links one per line, or paste a subscription URL (nodes are extracted automatically)
-2. **Select rule groups** — Check the services you need; common ones are pre-selected
+2. **Rule template** *(optional)* — Leave empty to use the default ACL4SSR Full template, or paste a URL to your own `.ini` file
 3. **Custom rules** *(optional)* — Add rules that take priority over all built-in ones
 4. **Generate** — Click **Generate Config** or press `Ctrl / ⌘ + Enter`
 5. **Use it** — Copy the subscription link into your client's remote profile URL field
 
 ---
 
+## Rule Templates
+
+The converter uses an ACL4SSR-style INI file to define proxy groups and rule sets. The default template is:
+
+```
+https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/ACL4SSR_Online_Full.ini
+```
+
+### Using a custom template
+
+You can host your own `.ini` file on GitHub (raw URL), any CDN, or a static file server, then paste the URL into the **Rule Template** field in the UI.
+
+The template format follows the ACL4SSR / sub-web convention — any remote config URL that works in [CareyWang/sub-web](https://github.com/CareyWang/sub-web) will work here too.
+
+### Template format reference
+
+```ini
+; Lines starting with ; or # are comments
+
+; Proxy groups — backtick-separated fields
+custom_proxy_group=🚀 Node Select`select`[]♻️ Auto Select`[]DIRECT
+custom_proxy_group=♻️ Auto Select`url-test`.*`http://www.gstatic.com/generate_204`300,,50
+custom_proxy_group=🇭🇰 HK Nodes`url-test`(HK|Hong Kong|港)`http://www.gstatic.com/generate_204`300,,50
+
+; Rule sets — GROUP,URL  or  GROUP,[]INLINE_RULE
+ruleset=🛑 AdBlock,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list
+ruleset=🎯 Direct,[]GEOIP,CN
+ruleset=🐟 Catch-all,[]FINAL
+```
+
+**Proxy group types:**
+
+| Type | Fields after type |
+|------|-------------------|
+| `select` | `[]GroupName` or `[]DIRECT` / `[]REJECT` (one per backtick field) |
+| `url-test` | `filter-regex` · `health-check-url` · `interval,,tolerance` |
+| `fallback` | same as `url-test` |
+| `load-balance` | same as `url-test` |
+
+**Special inline rules:**
+
+| INI value | Clash output |
+|-----------|-------------|
+| `[]FINAL` | `MATCH,<group>` |
+| `[]GEOIP,CN` | `GEOIP,CN,<group>,no-resolve` |
+| `[]IP-CIDR,x.x.x.x/y` | `IP-CIDR,x.x.x.x/y,<group>` |
+
+---
+
 ## API
 
 ```
-GET /api/clash?config=<encoded_links>[&rules=<rule_ids>][&customRules=<json_array>]
+GET /api/clash?config=<encoded_links>[&template=<encoded_url>][&customRules=<json_array>]
 ```
 
 | Parameter | Description |
 |-----------|-------------|
 | `config` | URL-encoded proxy links, separated by newlines or `\|` |
-| `rules` | Comma-separated rule group IDs (optional, defaults to all) |
+| `template` | URL-encoded `.ini` template URL (optional, defaults to ACL4SSR Full) |
 | `customRules` | JSON array of custom rule strings (optional) |
 
 **Example:**

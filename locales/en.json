@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Mihomo Subscription Converter",
-    "description": "Mihomo / Clash Meta config generator supporting Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks"
+    "description": "Mihomo / Clash Meta config generator supporting Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks, TUIC"
   },
   "theme": {
     "auto":  "Auto",
@@ -21,9 +21,11 @@
     "supported": "Supported protocols:"
   },
   "step2": {
-    "title": "Rule Groups",
-    "selectAll": "Select All",
-    "clear": "Clear"
+    "title": "Rule Template",
+    "optional": "(optional)",
+    "placeholder": "https://example.com/my-template.ini",
+    "description": "Leave empty to use the default ACL4SSR Full template. Compatible with sub-web remote config URLs.",
+    "defaultLabel": "Default: ACL4SSR Full Template"
   },
   "step3": {
     "title": "Custom Rules",
@@ -47,40 +49,10 @@
     "usageItems": [
       "Paste the URL into Clash for Windows / Mihomo Party / Stash or any compatible client",
       "The URL dynamically generates the latest config — re-generate whenever you update your nodes",
-      "Rule sets are powered by ACL4SSR and downloaded automatically by the client on first load"
+      "Rule sets are downloaded automatically by the client on first load"
     ],
     "yamlLines": "{{count}} lines",
     "download": "Download clash.yaml"
   },
-  "protocolRef": {
-    "title": "Node Link Format Reference",
-    "fields": {
-      "hysteria2": "sni: SNI hostname · insecure: skip cert verification · obfs / obfs-password: obfuscation",
-      "anytls": "sni: SNI hostname · insecure: skip cert verification · fastopen: TCP fast open · fp: fingerprint",
-      "vless": "security: tls / reality · pbk: public key · sid: shortId · sni: SNI · fp: fingerprint · flow: xtls-rprx-vision",
-      "trojan": "sni: SNI hostname · insecure: skip cert verification · fp: fingerprint",
-      "vmess": "JSON fields: add, port, id, aid, scy, net, tls, sni, host, path",
-      "ss": "Supports SIP002 (BASE64 userinfo) and legacy all-in-one BASE64 · plugin: obfs / v2ray-plugin",
-      "tuic": "alpn: h3 (recommended) · congestion-control: bbr / cubic · udp-relay-mode: native / quic"
-    }
-  },
-  "footer": "Mihomo Subconverter · For personal use only",
-  "rules": {
-    "BanAD":        { "label": "🛑 Ad Blocking",     "description": "Ad blocking + in-app ad removal" },
-    "GoogleFCM":    { "label": "📢 Google FCM",       "description": "Google Firebase push notifications" },
-    "Microsoft":    { "label": "Ⓜ️ Microsoft",        "description": "OneDrive + full Microsoft suite" },
-    "Apple":        { "label": "🍎 Apple",            "description": "Full Apple suite" },
-    "Telegram":     { "label": "📲 Telegram",         "description": "Telegram" },
-    "OpenAI":       { "label": "💬 OpenAI",           "description": "ChatGPT / OpenAI" },
-    "NewBing":      { "label": "🤖 Bing AI",          "description": "Microsoft Bing AI" },
-    "NetEaseMusic": { "label": "🎶 NetEase Music",    "description": "NetEase Cloud Music" },
-    "Gaming":       { "label": "🎮 Gaming",           "description": "EA / Epic / Origin / Sony / Steam / Nintendo" },
-    "TikTok":       { "label": "🎵 TikTok",           "description": "TikTok" },
-    "YouTube":      { "label": "📹 YouTube",          "description": "YouTube" },
-    "Netflix":      { "label": "🎥 Netflix",          "description": "Netflix" },
-    "Bahamut":      { "label": "📺 Bahamut",          "description": "Bahamut Animation" },
-    "Bilibili":     { "label": "📺 Bilibili",         "description": "Bilibili" },
-    "ChinaMedia":   { "label": "🌏 China Media",      "description": "Chinese streaming services" },
-    "ForeignMedia": { "label": "🌍 Overseas Media",   "description": "Overseas streaming (excl. YouTube / Netflix)" }
-  }
+  "footer": "Mihomo Subconverter · For personal use only"
 }
