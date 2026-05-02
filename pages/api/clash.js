@@ -33,7 +33,7 @@ export default function handler(req, res) {
     const yaml = generateClashConfig(proxies, selectedRuleIds, customRulesList)
 
     res.setHeader('Content-Type', 'application/x-yaml; charset=utf-8')
-    res.setHeader('Content-Disposition', 'attachment; filename="clash.yaml"')
+    res.setHeader('Content-Disposition', 'attachment; filename=clash.yaml')
     res.setHeader('Cache-Control', 'no-store')
     return res.status(200).send(yaml)
   } catch (err) {
