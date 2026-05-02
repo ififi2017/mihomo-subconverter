@@ -128,6 +128,62 @@ function ProtoBadge({ proto, count }) {
   )
 }
 
+/* ── Update notification (bottom-right toast) ──────────────────────── */
+function UpdateNotification() {
+  const [info,      setInfo]      = useState(null)  // { latest, url }
+  const [dismissed, setDismissed] = useState(false)
+
+  useEffect(() => {
+    // One-per-session dismissal
+    if (sessionStorage.getItem('update_dismissed')) { setDismissed(true); return }
+    fetch('/api/check-update')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.hasUpdate) setInfo(d) })
+      .catch(() => {})
+  }, [])
+
+  const dismiss = (e) => {
+    e.stopPropagation()
+    sessionStorage.setItem('update_dismissed', '1')
+    setDismissed(true)
+  }
+
+  if (!info || dismissed) return null
+
+  return (
+    <a href={info.url} target="_blank" rel="noopener noreferrer"
+      className="fixed bottom-5 right-5 z-50 flex items-start gap-3
+        max-w-[280px] px-4 py-3 rounded-[13px]
+        bg-white dark:bg-gray-900
+        border border-blue-200 dark:border-blue-700/60
+        text-gray-800 dark:text-gray-100
+        hover:border-blue-400 dark:hover:border-blue-500
+        transition-all cursor-pointer"
+      style={{ boxShadow: '0 4px 20px rgba(37,99,235,.15), 0 1px 4px rgba(0,0,0,.08)', animation: 'fadeIn .3s ease both' }}>
+      {/* Blue dot */}
+      <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-[3px]"
+        style={{ boxShadow: '0 0 0 3px rgba(59,130,246,.2)' }}/>
+      <div className="flex-1 min-w-0">
+        <p className="text-[12.5px] font-semibold text-gray-900 dark:text-white leading-tight">
+          Update available
+        </p>
+        <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-[2px]">
+          v{info.latest} is out — click to view
+        </p>
+      </div>
+      <button onClick={dismiss}
+        className="shrink-0 w-5 h-5 flex items-center justify-center
+          rounded-full text-gray-300 dark:text-gray-600
+          hover:text-gray-500 dark:hover:text-gray-400
+          hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+        <svg width="9" height="9" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+        </svg>
+      </button>
+    </a>
+  )
+}
+
 /* ── Shared button style ───────────────────────────────────────────── */
 const secBtnCls = 'flex items-center gap-1.5 px-3 py-[6px] rounded-lg text-xs font-medium ' +
   'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 ' +
@@ -349,6 +405,8 @@ export default function Home() {
         <meta name="description" content={t('meta.description')} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        {/* Discourage indexing — this is a personal-use self-hosted tool */}
+        <meta name="robots" content="noindex, nofollow, noarchive" />
       </Head>
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
@@ -830,6 +888,8 @@ export default function Home() {
           </div>
         </footer>
       </div>
+
+      <UpdateNotification />
     </>
   )
 }
