@@ -13,7 +13,7 @@
     "extractedBadge": "已从订阅链接提取",
     "nodeCount": "{{count}} 条节点",
     "placeholder": "# 粘贴你的节点链接，每行一个，支持以下格式：\n# hysteria2://password@host:port?peer=sni&insecure=1#节点名称\n# anytls://password@host:port?peer=sni&insecure=1#节点名称\n# vless://uuid@host:port?security=reality&pbk=xxx&sni=xxx&fp=chrome&sid=xxx#节点名称\n# trojan://password@host:port?sni=xxx#节点名称\n# vmess://base64...\n# ss://method:password@host:port#节点名称",
-    "supported": "支持协议：hysteria2 · anytls · vless · trojan · vmess · ss · tuic"
+    "supported": "支持协议："
   },
   "step2": {
     "title": "选择规则组",
@@ -50,10 +50,13 @@
   "protocolRef": {
     "title": "节点链接格式参考",
     "fields": {
-      "hysteria2": "peer/sni: SNI域名 · insecure: 跳过证书验证",
-      "anytls": "peer/sni: SNI域名 · fastopen: TCP快速打开 · fp: 指纹",
-      "vless": "pbk: 公钥 · sid: shortId · sni: SNI · fp: 指纹",
-      "trojan": "sni: SNI域名 · insecure: 跳过证书验证"
+      "hysteria2": "sni: SNI 域名 · insecure: 跳过证书验证 · obfs / obfs-password: 混淆",
+      "anytls": "sni: SNI 域名 · insecure: 跳过证书验证 · fastopen: TCP 快速打开 · fp: 指纹",
+      "vless": "security: tls / reality · pbk: 公钥 · sid: shortId · sni: SNI · fp: 指纹 · flow: xtls-rprx-vision",
+      "trojan": "sni: SNI 域名 · insecure: 跳过证书验证 · fp: 指纹",
+      "vmess": "JSON 字段：add, port, id, aid, scy, net, tls, sni, host, path",
+      "ss": "支持 SIP002（BASE64 用户信息）和传统全量 BASE64 格式 · plugin: obfs / v2ray-plugin",
+      "tuic": "alpn: h3（推荐）· congestion-control: bbr / cubic · udp-relay-mode: native / quic"
     }
   },
   "footer": "Mihomo Subconverter · 仅供个人使用",

@@ -13,7 +13,7 @@
     "extractedBadge": "Extracted from subscription URL",
     "nodeCount": "{{count}} nodes",
     "placeholder": "# Paste your proxy links here, one per line:\n# hysteria2://password@host:port?peer=sni&insecure=1#NodeName\n# anytls://password@host:port?peer=sni&insecure=1#NodeName\n# vless://uuid@host:port?security=reality&pbk=xxx&sni=xxx&fp=chrome&sid=xxx#NodeName\n# trojan://password@host:port?sni=xxx#NodeName\n# vmess://base64...\n# ss://method:password@host:port#NodeName",
-    "supported": "Supported protocols: hysteria2 · anytls · vless · trojan · vmess · ss · tuic"
+    "supported": "Supported protocols:"
   },
   "step2": {
     "title": "Rule Groups",
@@ -50,10 +50,13 @@
   "protocolRef": {
     "title": "Node Link Format Reference",
     "fields": {
-      "hysteria2": "peer/sni: SNI hostname · insecure: skip cert verification",
-      "anytls": "peer/sni: SNI hostname · fastopen: TCP fast open · fp: fingerprint",
-      "vless": "pbk: public key · sid: shortId · sni: SNI · fp: fingerprint",
-      "trojan": "sni: SNI hostname · insecure: skip cert verification"
+      "hysteria2": "sni: SNI hostname · insecure: skip cert verification · obfs / obfs-password: obfuscation",
+      "anytls": "sni: SNI hostname · insecure: skip cert verification · fastopen: TCP fast open · fp: fingerprint",
+      "vless": "security: tls / reality · pbk: public key · sid: shortId · sni: SNI · fp: fingerprint · flow: xtls-rprx-vision",
+      "trojan": "sni: SNI hostname · insecure: skip cert verification · fp: fingerprint",
+      "vmess": "JSON fields: add, port, id, aid, scy, net, tls, sni, host, path",
+      "ss": "Supports SIP002 (BASE64 userinfo) and legacy all-in-one BASE64 · plugin: obfs / v2ray-plugin",
+      "tuic": "alpn: h3 (recommended) · congestion-control: bbr / cubic · udp-relay-mode: native / quic"
     }
   },
   "footer": "Mihomo Subconverter · For personal use only",

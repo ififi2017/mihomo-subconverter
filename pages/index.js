@@ -261,10 +261,18 @@ export default function Home() {
               />
               <p className="mt-2 text-xs text-gray-500">
                 {t('step1.supported')}{' '}
-                {['hysteria2', 'anytls', 'vless', 'trojan', 'vmess', 'ss'].map((p, i, arr) => (
-                  <span key={p}>
-                    <code className="text-blue-400">{p}</code>
-                    {i < arr.length - 1 && <span className="text-gray-600">、</span>}
+                {[
+                  { key: 'hy2',    label: 'Hysteria2'   },
+                  { key: 'anytls', label: 'AnyTLS'      },
+                  { key: 'vless',  label: 'VLESS'       },
+                  { key: 'trojan', label: 'Trojan'      },
+                  { key: 'vmess',  label: 'VMess'       },
+                  { key: 'ss',     label: 'Shadowsocks' },
+                  { key: 'tuic',   label: 'TUIC'        },
+                ].map(({ key, label }, i, arr) => (
+                  <span key={key}>
+                    <code className="text-blue-400">{label}</code>
+                    {i < arr.length - 1 && <span className="text-gray-600"> · </span>}
                   </span>
                 ))}
               </p>
@@ -487,10 +495,13 @@ export default function Home() {
             </button>
             <div id="protocol-ref" className="hidden border-t border-gray-800 p-4 space-y-4">
               {[
-                { name: 'Hysteria2', key: 'hysteria2', example: 'hysteria2://password@host:port?peer=sni&insecure=1#NodeName' },
-                { name: 'AnyTLS',   key: 'anytls',    example: 'anytls://password@host:port?peer=sni&insecure=1&fastopen=1#NodeName' },
-                { name: 'VLESS',    key: 'vless',     example: 'vless://uuid@host:port?security=reality&pbk=publickey&sni=sni&fp=chrome&sid=shortid&type=tcp#NodeName' },
-                { name: 'Trojan',   key: 'trojan',    example: 'trojan://password@host:port?sni=xxx#NodeName' },
+                { name: 'Hysteria2',   key: 'hysteria2', example: 'hysteria2://password@host:port?sni=example.com&insecure=1#NodeName' },
+                { name: 'AnyTLS',      key: 'anytls',    example: 'anytls://password@host:port?sni=example.com&insecure=1&fastopen=1#NodeName' },
+                { name: 'VLESS',       key: 'vless',     example: 'vless://uuid@host:port?security=reality&pbk=publickey&sni=example.com&fp=chrome&sid=shortid&type=tcp&flow=xtls-rprx-vision#NodeName' },
+                { name: 'Trojan',      key: 'trojan',    example: 'trojan://password@host:port?sni=example.com#NodeName' },
+                { name: 'VMess',       key: 'vmess',     example: 'vmess://<base64-encoded-json>' },
+                { name: 'Shadowsocks', key: 'ss',        example: 'ss://BASE64(method:password)@host:port#NodeName' },
+                { name: 'TUIC',        key: 'tuic',      example: 'tuic://uuid:password@host:port?sni=example.com&alpn=h3&congestion-control=bbr#NodeName' },
               ].map(p => (
                 <div key={p.key} className="space-y-1.5">
                   <div className="text-sm font-medium text-blue-400">{p.name}</div>
