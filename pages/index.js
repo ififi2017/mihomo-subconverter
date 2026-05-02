@@ -16,6 +16,10 @@ const PROTO_COLORS = {
   ss:     ['rgba(16,185,129,.12)',  '#047857', 'rgba(16,185,129,.25)'],
   tuic:   ['rgba(236,72,153,.12)',  '#9d174d', 'rgba(236,72,153,.25)'],
 }
+const PROTO_LABELS = {
+  hy2: 'Hysteria2', anytls: 'AnyTLS', vless: 'VLESS',
+  trojan: 'Trojan', vmess: 'VMess', ss: 'Shadowsocks', tuic: 'TUIC',
+}
 
 /* ── Icons ────────────────────────────────────────────────────────── */
 function IconSun()  {
@@ -119,7 +123,7 @@ function ProtoBadge({ proto, count }) {
       fontSize: 10.5, fontWeight: 500,
       background: bg, color, border: `1px solid ${border}`, letterSpacing: .01,
     }}>
-      {proto}<span style={{ opacity: .55, marginLeft: 1 }}>×{count}</span>
+      {PROTO_LABELS[proto] ?? proto}<span style={{ opacity: .55, marginLeft: 1 }}>×{count}</span>
     </span>
   )
 }
@@ -489,27 +493,32 @@ export default function Home() {
 
             {/* Template URL sub-row */}
             <div className="px-[18px] pt-3 pb-3 border-b border-gray-50 dark:border-gray-800/60">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 whitespace-nowrap">
+              <div className="flex flex-col gap-[6px]">
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                   {t('step2.templateLabel')}
-                  <span className="ml-1 opacity-60">{t('step2.templateOptional')}</span>
+                  <span className="ml-1 font-normal opacity-60">{t('step2.templateOptional')}</span>
                 </span>
-                <input
-                  type="url"
-                  value={templateUrl}
-                  onChange={e => handleTemplateInput(e.target.value)}
-                  placeholder={t('step2.templatePlaceholder')}
-                  className="flex-1 min-w-0 bg-transparent text-[11.5px] font-mono
-                    text-gray-600 dark:text-gray-300
-                    placeholder-gray-300 dark:placeholder-gray-600
-                    focus:outline-none"
-                  spellCheck={false}
-                />
-                {!templateUrl && (
-                  <span className="text-[11px] text-gray-300 dark:text-gray-600 shrink-0 italic hidden sm:block">
-                    {t('step2.templateDefault')}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={templateUrl}
+                    onChange={e => handleTemplateInput(e.target.value)}
+                    placeholder={t('step2.templatePlaceholder')}
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-gray-950
+                      border border-gray-200 dark:border-gray-700 rounded-[9px]
+                      px-[11px] py-[7px] text-[12px] font-mono
+                      text-gray-700 dark:text-gray-200
+                      placeholder-gray-300 dark:placeholder-gray-600
+                      focus:outline-none focus:border-blue-500
+                      transition-colors"
+                    spellCheck={false}
+                  />
+                  {!templateUrl && (
+                    <span className="text-[11px] text-gray-300 dark:text-gray-600 shrink-0 italic hidden sm:block">
+                      {t('step2.templateDefault')}
+                    </span>
+                  )}
+                </div>
               </div>
               {/* Description: sub-web compat note + example link */}
               <p className="mt-[7px] text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed flex flex-wrap items-baseline gap-x-1">
