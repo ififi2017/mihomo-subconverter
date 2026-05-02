@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Mihomo Subscription Converter",
-    "description": "Mihomo / Clash Meta config generator supporting Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks, TUIC"
+    "description": "Mihomo / Clash config generator supporting Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks, TUIC"
   },
   "theme": {
     "auto":  "Auto",
@@ -10,7 +10,7 @@
   },
   "header": {
     "title": "Mihomo Subscription Converter",
-    "subtitle": "Clash Meta Config Generator",
+    "subtitle": "Clash Config Generator",
     "credit": "Thanks to ACL4SSR for rule sets"
   },
   "step1": {
