@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "title": "Mihomo Subscription Converter",
+    "description": "Mihomo / Clash Meta config generator supporting Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks"
+  },
+  "header": {
+    "title": "Mihomo Subscription Converter",
+    "subtitle": "Clash Meta Config Generator",
+    "credit": "Thanks to ACL4SSR for rule sets"
+  },
+  "step1": {
+    "title": "Proxy Node Links",
+    "extractedBadge": "Extracted from subscription URL",
+    "nodeCount": "{{count}} nodes",
+    "placeholder": "# Paste your proxy links here, one per line:\n# hysteria2://password@host:port?peer=sni&insecure=1#NodeName\n# anytls://password@host:port?peer=sni&insecure=1#NodeName\n# vless://uuid@host:port?security=reality&pbk=xxx&sni=xxx&fp=chrome&sid=xxx#NodeName\n# trojan://password@host:port?sni=xxx#NodeName\n# vmess://base64...\n# ss://method:password@host:port#NodeName",
+    "supported": "Supported protocols:"
+  },
+  "step2": {
+    "title": "Rule Groups",
+    "selectAll": "Select All",
+    "clear": "Clear"
+  },
+  "step3": {
+    "title": "Custom Rules",
+    "optional": "(optional)",
+    "placeholder": "# Custom rules, one per line. These take highest priority.\n# e.g.:\nDOMAIN-SUFFIX,example.com,🚀 节点选择\nIP-CIDR,1.2.3.4/32,DIRECT"
+  },
+  "generate": {
+    "button": "Generate Config",
+    "loading": "Generating...",
+    "errorEmpty": "Please enter at least one proxy link",
+    "errorFailed": "Generation failed. Please check your proxy link format."
+  },
+  "result": {
+    "title": "Result",
+    "tabUrl": "Subscription URL",
+    "tabYaml": "Config Preview",
+    "urlDescription": "Paste the following URL into your Clash / Mihomo client as a remote profile:",
+    "copy": "Copy",
+    "copied": "Copied",
+    "usageTitle": "How to use",
+    "usageItems": [
+      "Paste the URL into Clash for Windows / Mihomo Party / Stash or any compatible client",
+      "The URL dynamically generates the latest config — re-generate whenever you update your nodes",
+      "Rule sets are powered by ACL4SSR and downloaded automatically by the client on first load"
+    ],
+    "yamlLines": "{{count}} lines",
+    "download": "Download clash.yaml"
+  },
+  "protocolRef": {
+    "title": "Node Link Format Reference",
+    "fields": {
+      "hysteria2": "peer/sni: SNI hostname · insecure: skip cert verification",
+      "anytls": "peer/sni: SNI hostname · fastopen: TCP fast open · fp: fingerprint",
+      "vless": "pbk: public key · sid: shortId · sni: SNI · fp: fingerprint",
+      "trojan": "sni: SNI hostname · insecure: skip cert verification"
+    }
+  },
+  "footer": "Mihomo Subconverter · For personal use only",
+  "rules": {
+    "BanAD":        { "label": "🛑 Ad Blocking",     "description": "Ad blocking + in-app ad removal" },
+    "GoogleFCM":    { "label": "📢 Google FCM",       "description": "Google Firebase push notifications" },
+    "Microsoft":    { "label": "Ⓜ️ Microsoft",        "description": "OneDrive + full Microsoft suite" },
+    "Apple":        { "label": "🍎 Apple",            "description": "Full Apple suite" },
+    "Telegram":     { "label": "📲 Telegram",         "description": "Telegram" },
+    "OpenAI":       { "label": "💬 OpenAI",           "description": "ChatGPT / OpenAI" },
+    "NewBing":      { "label": "🤖 Bing AI",          "description": "Microsoft Bing AI" },
+    "NetEaseMusic": { "label": "🎶 NetEase Music",    "description": "NetEase Cloud Music" },
+    "Gaming":       { "label": "🎮 Gaming",           "description": "EA / Epic / Origin / Sony / Steam / Nintendo" },
+    "TikTok":       { "label": "🎵 TikTok",           "description": "TikTok" },
+    "YouTube":      { "label": "📹 YouTube",          "description": "YouTube" },
+    "Netflix":      { "label": "🎥 Netflix",          "description": "Netflix" },
+    "Bahamut":      { "label": "📺 Bahamut",          "description": "Bahamut Animation" },
+    "Bilibili":     { "label": "📺 Bilibili",         "description": "Bilibili" },
+    "ChinaMedia":   { "label": "🌏 China Media",      "description": "Chinese streaming services" },
+    "ForeignMedia": { "label": "🌍 Overseas Media",   "description": "Overseas streaming (excl. YouTube / Netflix)" }
+  }
+}

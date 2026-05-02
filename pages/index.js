@@ -1,20 +1,23 @@
 import { useState, useCallback, useEffect } from 'react'
 import Head from 'next/head'
 import { RULE_GROUPS } from '../lib/rules'
+import { useI18n, LOCALES } from '../lib/i18n'
 
 const DEFAULT_RULES = RULE_GROUPS.filter(g => g.default).map(g => g.id)
-
-const EXAMPLE_LINKS = `# 粘贴你的节点链接，每行一个，支持以下格式：
-# hysteria2://password@host:port?peer=sni&insecure=1#节点名称
-# anytls://password@host:port?peer=sni&insecure=1#节点名称
-# vless://uuid@host:port?security=reality&pbk=xxx&sni=xxx&fp=chrome&sid=xxx#节点名称
-# trojan://password@host:port?sni=xxx#节点名称
-# vmess://base64...
-# ss://method:password@host:port#节点名称`
-
 const LS_KEY = 'mihomo_proxy_links'
 
+const PROTO_COLORS = {
+  hy2:    'bg-violet-500/15 text-violet-400 ring-violet-500/20',
+  anytls: 'bg-cyan-500/15 text-cyan-400 ring-cyan-500/20',
+  vless:  'bg-blue-500/15 text-blue-400 ring-blue-500/20',
+  trojan: 'bg-rose-500/15 text-rose-400 ring-rose-500/20',
+  vmess:  'bg-amber-500/15 text-amber-400 ring-amber-500/20',
+  ss:     'bg-emerald-500/15 text-emerald-400 ring-emerald-500/20',
+}
+
 export default function Home() {
+  const { t, locale, setLocale } = useI18n()
+
   const [proxyLinks, setProxyLinks] = useState('')
   const [selectedRules, setSelectedRules] = useState(new Set(DEFAULT_RULES))
   const [customRules, setCustomRules] = useState('')
@@ -24,7 +27,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const [copied, setCopied] = useState('')
   const [activeTab, setActiveTab] = useState('url')
-  const [extractedFrom, setExtractedFrom] = useState('')  // URL that nodes were extracted from
+  const [extractedFrom, setExtractedFrom] = useState('')
 
   // 从 localStorage 恢复上次输入
   useEffect(() => {
@@ -38,7 +41,6 @@ export default function Home() {
 
   const handleProxyInput = useCallback((raw) => {
     const trimmed = raw.trim()
-    // 单行 http(s):// 链接 → 尝试从 config 参数提取节点
     if (/^https?:\/\//.test(trimmed) && !trimmed.includes('\n')) {
       try {
         const url = new URL(trimmed)
@@ -59,7 +61,6 @@ export default function Home() {
         }
       } catch { /* 不是合法 URL，当普通文本处理 */ }
     }
-    // 普通文本
     setProxyLinks(raw)
     try { localStorage.setItem(LS_KEY, raw) } catch { }
     setExtractedFrom('')
@@ -77,20 +78,12 @@ export default function Home() {
     const links = proxyLinks.trim().split('\n')
       .filter(l => l.trim() && !l.trim().startsWith('#'))
       .join('\n')
-
     if (!links) return null
-
     const params = new URLSearchParams()
     params.set('config', links)
-    if (selectedRules.size > 0) {
-      params.set('rules', Array.from(selectedRules).join(','))
-    }
-
+    if (selectedRules.size > 0) params.set('rules', Array.from(selectedRules).join(','))
     const customList = customRules.trim().split('\n').filter(l => l.trim() && !l.trim().startsWith('#'))
-    if (customList.length > 0) {
-      params.set('customRules', JSON.stringify(customList))
-    }
-
+    if (customList.length > 0) params.set('customRules', JSON.stringify(customList))
     return `${base}/api/clash?${params.toString()}`
   }, [proxyLinks, selectedRules, customRules])
 
@@ -98,41 +91,24 @@ export default function Home() {
     const links = proxyLinks.trim().split('\n')
       .filter(l => l.trim() && !l.trim().startsWith('#'))
       .join('\n')
-
-    if (!links) {
-      setError('请输入至少一条节点链接')
-      return
-    }
+    if (!links) { setError(t('generate.errorEmpty')); return }
 
     setError('')
     setLoading(true)
-
     try {
-      const origin = window.location.origin
-      const url = buildApiUrl(origin)
-      if (!url) {
-        setError('请输入节点链接')
-        setLoading(false)
-        return
-      }
-
+      const url = buildApiUrl(window.location.origin)
+      if (!url) { setError(t('generate.errorEmpty')); setLoading(false); return }
       setSubUrl(url)
-
-      // Fetch preview
       const res = await fetch(url)
-      if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-      }
-      const yaml = await res.text()
-      setYamlPreview(yaml)
+      if (!res.ok) throw new Error(await res.text())
+      setYamlPreview(await res.text())
       setActiveTab('url')
     } catch (e) {
-      setError(e.message || '生成失败，请检查节点链接格式')
+      setError(e.message || t('generate.errorFailed'))
     } finally {
       setLoading(false)
     }
-  }, [proxyLinks, selectedRules, customRules, buildApiUrl])
+  }, [proxyLinks, buildApiUrl, t])
 
   useEffect(() => {
     const handler = (e) => {
@@ -148,8 +124,6 @@ export default function Home() {
   const copyToClipboard = useCallback(async (text, key) => {
     try {
       await navigator.clipboard.writeText(text)
-      setCopied(key)
-      setTimeout(() => setCopied(''), 2000)
     } catch {
       const el = document.createElement('textarea')
       el.value = text
@@ -157,9 +131,9 @@ export default function Home() {
       el.select()
       document.execCommand('copy')
       document.body.removeChild(el)
-      setCopied(key)
-      setTimeout(() => setCopied(''), 2000)
     }
+    setCopied(key)
+    setTimeout(() => setCopied(''), 2000)
   }, [])
 
   const downloadYaml = useCallback(() => {
@@ -167,20 +141,9 @@ export default function Home() {
     const blob = new Blob([yamlPreview], { type: 'application/x-yaml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
-    a.href = url
-    a.download = 'clash.yaml'
-    a.click()
+    a.href = url; a.download = 'clash.yaml'; a.click()
     URL.revokeObjectURL(url)
   }, [yamlPreview])
-
-  const PROTO_COLORS = {
-    hy2:    'bg-violet-500/15 text-violet-400 ring-violet-500/20',
-    anytls: 'bg-cyan-500/15 text-cyan-400 ring-cyan-500/20',
-    vless:  'bg-blue-500/15 text-blue-400 ring-blue-500/20',
-    trojan: 'bg-rose-500/15 text-rose-400 ring-rose-500/20',
-    vmess:  'bg-amber-500/15 text-amber-400 ring-amber-500/20',
-    ss:     'bg-emerald-500/15 text-emerald-400 ring-emerald-500/20',
-  }
 
   const analyzeProxies = () => {
     const PROTO_MAP = {
@@ -190,25 +153,23 @@ export default function Home() {
     }
     const counts = {}
     for (const line of proxyLinks.split('\n')) {
-      const t = line.trim()
-      if (!t || t.startsWith('#')) continue
+      const l = line.trim()
+      if (!l || l.startsWith('#')) continue
       for (const [prefix, proto] of Object.entries(PROTO_MAP)) {
-        if (t.startsWith(prefix)) {
-          counts[proto] = (counts[proto] || 0) + 1
-          break
-        }
+        if (l.startsWith(prefix)) { counts[proto] = (counts[proto] || 0) + 1; break }
       }
     }
     const total = Object.values(counts).reduce((a, b) => a + b, 0)
-    const breakdown = Object.entries(counts)
-    return { total, breakdown }
+    return { total, breakdown: Object.entries(counts) }
   }
+
+  const { total, breakdown } = analyzeProxies()
 
   return (
     <>
       <Head>
-        <title>Mihomo 订阅转换</title>
-        <meta name="description" content="Clash / Mihomo 订阅链接转换工具，支持 Hysteria2、AnyTLS、VLESS Reality 等协议" />
+        <title>{t('meta.title')}</title>
+        <meta name="description" content={t('meta.description')} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </Head>
@@ -220,18 +181,34 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-sm font-bold">M</div>
               <div>
-                <h1 className="text-lg font-semibold text-white">Mihomo 订阅转换</h1>
-                <p className="text-xs text-gray-400">Clash Meta 配置生成器</p>
+                <h1 className="text-lg font-semibold text-white">{t('header.title')}</h1>
+                <p className="text-xs text-gray-400">{t('header.subtitle')}</p>
               </div>
             </div>
-            <a
-              href="https://github.com/ACL4SSR/ACL4SSR"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              感谢 ACL4SSR 提供规则集
-            </a>
+            <div className="flex items-center gap-3">
+              {/* Language switcher */}
+              <div className="flex items-center gap-1 bg-gray-800 rounded-lg p-1">
+                {Object.entries(LOCALES).map(([key, { name }]) => (
+                  <button
+                    key={key}
+                    onClick={() => setLocale(key)}
+                    className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                      locale === key ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+              <a
+                href="https://github.com/ACL4SSR/ACL4SSR"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 hover:text-gray-300 transition-colors hidden sm:block"
+              >
+                {t('header.credit')}
+              </a>
+            </div>
           </div>
         </header>
 
@@ -242,7 +219,7 @@ export default function Home() {
             <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-blue-600 text-xs flex items-center justify-center font-bold">1</span>
-                <h2 className="font-medium text-white">输入节点链接</h2>
+                <h2 className="font-medium text-white">{t('step1.title')}</h2>
               </div>
               <div className="flex items-center gap-2">
                 {extractedFrom && (
@@ -250,16 +227,16 @@ export default function Home() {
                     <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    已从订阅链接提取
+                    {t('step1.extractedBadge')}
                   </span>
                 )}
-                {analyzeProxies().total > 0 && (
+                {total > 0 && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-medium text-gray-400">
-                      {analyzeProxies().total} nodes
+                      {t('step1.nodeCount', { count: total })}
                     </span>
                     <span className="text-gray-700">·</span>
-                    {analyzeProxies().breakdown.map(([proto, count]) => (
+                    {breakdown.map(([proto, count]) => (
                       <span
                         key={proto}
                         className={`text-[11px] font-medium px-2 py-0.5 rounded-full ring-1 ${PROTO_COLORS[proto] ?? 'bg-gray-500/15 text-gray-400 ring-gray-500/20'}`}
@@ -275,13 +252,19 @@ export default function Home() {
               <textarea
                 value={proxyLinks}
                 onChange={e => handleProxyInput(e.target.value)}
-                placeholder={EXAMPLE_LINKS}
+                placeholder={t('step1.placeholder')}
                 rows={8}
-                className="w-full bg-gray-950 border border-gray-700 rounded-lg px-4 py-3 text-sm font-mono text-gray-200 placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-y scrollbar-thin"
+                className="w-full bg-gray-950 border border-gray-700 rounded-lg px-4 py-3 text-sm font-mono text-gray-200 placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-y"
                 spellCheck={false}
               />
               <p className="mt-2 text-xs text-gray-500">
-                支持协议：<code className="text-blue-400">hysteria2</code>、<code className="text-blue-400">anytls</code>、<code className="text-blue-400">vless</code>、<code className="text-blue-400">trojan</code>、<code className="text-blue-400">vmess</code>、<code className="text-blue-400">ss</code>
+                {t('step1.supported')}{' '}
+                {['hysteria2', 'anytls', 'vless', 'trojan', 'vmess', 'ss'].map((p, i, arr) => (
+                  <span key={p}>
+                    <code className="text-blue-400">{p}</code>
+                    {i < arr.length - 1 && <span className="text-gray-600">、</span>}
+                  </span>
+                ))}
               </p>
             </div>
           </section>
@@ -291,21 +274,21 @@ export default function Home() {
             <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-blue-600 text-xs flex items-center justify-center font-bold">2</span>
-                <h2 className="font-medium text-white">选择规则组</h2>
+                <h2 className="font-medium text-white">{t('step2.title')}</h2>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setSelectedRules(new Set(RULE_GROUPS.map(g => g.id)))}
                   className="text-xs text-gray-400 hover:text-white transition-colors"
                 >
-                  全选
+                  {t('step2.selectAll')}
                 </button>
                 <span className="text-gray-700">·</span>
                 <button
                   onClick={() => setSelectedRules(new Set())}
                   className="text-xs text-gray-400 hover:text-white transition-colors"
                 >
-                  清空
+                  {t('step2.clear')}
                 </button>
               </div>
             </div>
@@ -326,8 +309,8 @@ export default function Home() {
                     className="mt-0.5 accent-blue-500"
                   />
                   <div className="min-w-0">
-                    <div className="text-sm font-medium truncate">{group.label}</div>
-                    <div className="text-xs text-gray-500 truncate mt-0.5">{group.description}</div>
+                    <div className="text-sm font-medium truncate">{t(`rules.${group.id}.label`)}</div>
+                    <div className="text-xs text-gray-500 truncate mt-0.5">{t(`rules.${group.id}.description`)}</div>
                   </div>
                 </label>
               ))}
@@ -339,18 +322,19 @@ export default function Home() {
             <div className="px-5 py-4 border-b border-gray-800">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-blue-600 text-xs flex items-center justify-center font-bold">3</span>
-                <div>
-                  <h2 className="font-medium text-white">自定义规则 <span className="text-xs text-gray-500 font-normal ml-1">（可选）</span></h2>
-                </div>
+                <h2 className="font-medium text-white">
+                  {t('step3.title')}
+                  <span className="text-xs text-gray-500 font-normal ml-2">{t('step3.optional')}</span>
+                </h2>
               </div>
             </div>
             <div className="p-4">
               <textarea
                 value={customRules}
                 onChange={e => setCustomRules(e.target.value)}
-                placeholder={`# 自定义规则，每行一条，优先于内置规则生效\n# 例如：\nDOMAIN-SUFFIX,example.com,🔰 节点选择\nIP-CIDR,1.2.3.4/32,DIRECT`}
+                placeholder={t('step3.placeholder')}
                 rows={4}
-                className="w-full bg-gray-950 border border-gray-700 rounded-lg px-4 py-3 text-sm font-mono text-gray-200 placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-y scrollbar-thin"
+                className="w-full bg-gray-950 border border-gray-700 rounded-lg px-4 py-3 text-sm font-mono text-gray-200 placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-y"
                 spellCheck={false}
               />
             </div>
@@ -369,14 +353,14 @@ export default function Home() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  生成中...
+                  {t('generate.loading')}
                 </>
               ) : (
                 <>
                   <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
                   </svg>
-                  生成订阅配置
+                  {t('generate.button')}
                   <kbd className="ml-1 text-[10px] opacity-50 font-mono border border-current rounded px-1">⌘↵</kbd>
                 </>
               )}
@@ -386,7 +370,7 @@ export default function Home() {
           {/* Error */}
           {error && (
             <div className="bg-red-900/30 border border-red-700/50 rounded-xl px-5 py-4 text-red-400 text-sm">
-              <strong>错误：</strong>{error}
+              {error}
             </div>
           )}
 
@@ -394,7 +378,7 @@ export default function Home() {
           {(subUrl || yamlPreview) && (
             <section className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
               <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
-                <h2 className="font-medium text-white">生成结果</h2>
+                <h2 className="font-medium text-white">{t('result.title')}</h2>
                 <div className="flex items-center gap-1 bg-gray-800 rounded-lg p-1">
                   <button
                     onClick={() => setActiveTab('url')}
@@ -402,7 +386,7 @@ export default function Home() {
                       activeTab === 'url' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
                     }`}
                   >
-                    订阅链接
+                    {t('result.tabUrl')}
                   </button>
                   <button
                     onClick={() => setActiveTab('yaml')}
@@ -410,7 +394,7 @@ export default function Home() {
                       activeTab === 'yaml' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'
                     }`}
                   >
-                    配置预览
+                    {t('result.tabYaml')}
                   </button>
                 </div>
               </div>
@@ -418,7 +402,7 @@ export default function Home() {
               {activeTab === 'url' && subUrl && (
                 <div className="p-4 space-y-4">
                   <div>
-                    <p className="text-xs text-gray-400 mb-2">将以下链接填入 Clash / Mihomo 客户端的订阅地址栏：</p>
+                    <p className="text-xs text-gray-400 mb-2">{t('result.urlDescription')}</p>
                     <div className="flex gap-2">
                       <input
                         readOnly
@@ -434,7 +418,7 @@ export default function Home() {
                             <svg className="w-4 h-4 text-green-400" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
-                            已复制
+                            {t('result.copied')}
                           </>
                         ) : (
                           <>
@@ -442,18 +426,18 @@ export default function Home() {
                               <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                               <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                             </svg>
-                            复制
+                            {t('result.copy')}
                           </>
                         )}
                       </button>
                     </div>
                   </div>
                   <div className="bg-gray-800/50 rounded-lg p-4 text-xs text-gray-400 space-y-2">
-                    <p className="font-medium text-gray-300 text-sm">使用说明</p>
+                    <p className="font-medium text-gray-300 text-sm">{t('result.usageTitle')}</p>
                     <ul className="space-y-1 list-disc list-inside">
-                      <li>将订阅链接填入 <strong className="text-gray-200">Clash for Windows / Mihomo Party / Stash</strong> 等客户端</li>
-                      <li>订阅链接会动态生成最新配置，节点更新后重新生成链接即可</li>
-                      <li>规则组使用 <strong className="text-gray-200">ACL4SSR</strong> 规则，客户端首次加载时会自动下载</li>
+                      {(LOCALES[locale]?.messages?.result?.usageItems ?? []).map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
                     </ul>
                   </div>
                 </div>
@@ -462,23 +446,25 @@ export default function Home() {
               {activeTab === 'yaml' && yamlPreview && (
                 <div className="p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-400">{yamlPreview.split('\n').length} 行配置</span>
+                    <span className="text-xs text-gray-400">
+                      {t('result.yamlLines', { count: yamlPreview.split('\n').length })}
+                    </span>
                     <div className="flex gap-2">
                       <button
                         onClick={() => copyToClipboard(yamlPreview, 'yaml')}
-                        className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-xs transition-colors"
                       >
-                        {copied === 'yaml' ? '✓ 已复制' : '复制'}
+                        {copied === 'yaml' ? `✓ ${t('result.copied')}` : t('result.copy')}
                       </button>
                       <button
                         onClick={downloadYaml}
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs transition-colors"
                       >
-                        下载 clash.yaml
+                        {t('result.download')}
                       </button>
                     </div>
                   </div>
-                  <pre className="bg-gray-950 border border-gray-700 rounded-lg p-4 text-xs font-mono text-gray-300 overflow-auto max-h-96 scrollbar-thin">
+                  <pre className="bg-gray-950 border border-gray-700 rounded-lg p-4 text-xs font-mono text-gray-300 overflow-auto max-h-96">
                     {yamlPreview}
                   </pre>
                 </div>
@@ -492,40 +478,24 @@ export default function Home() {
               onClick={() => document.getElementById('protocol-ref').classList.toggle('hidden')}
               className="w-full px-5 py-4 flex items-center justify-between text-left"
             >
-              <h2 className="font-medium text-gray-300 text-sm">节点链接格式参考</h2>
+              <h2 className="font-medium text-gray-300 text-sm">{t('protocolRef.title')}</h2>
               <svg className="w-4 h-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </button>
             <div id="protocol-ref" className="hidden border-t border-gray-800 p-4 space-y-4">
               {[
-                {
-                  name: 'Hysteria2',
-                  example: 'hysteria2://password@host:port?peer=sni&insecure=1#节点名称',
-                  fields: 'peer/sni: SNI域名, insecure: 跳过证书验证',
-                },
-                {
-                  name: 'AnyTLS',
-                  example: 'anytls://password@host:port?peer=sni&insecure=1&fastopen=1&udp=1#节点名称',
-                  fields: 'peer/sni: SNI域名, fastopen: TCP快速打开, fp: 指纹',
-                },
-                {
-                  name: 'VLESS Reality',
-                  example: 'vless://uuid@host:port?security=reality&pbk=publickey&sni=sni&fp=chrome&sid=shortid&type=tcp&flow=xtls-rprx-vision#节点名称',
-                  fields: 'pbk: 公钥, sid: shortId, sni: SNI, fp: 指纹',
-                },
-                {
-                  name: 'Trojan',
-                  example: 'trojan://password@host:port?sni=xxx#节点名称',
-                  fields: 'sni: SNI域名, insecure: 跳过证书验证',
-                },
+                { name: 'Hysteria2', key: 'hysteria2', example: 'hysteria2://password@host:port?peer=sni&insecure=1#NodeName' },
+                { name: 'AnyTLS',   key: 'anytls',    example: 'anytls://password@host:port?peer=sni&insecure=1&fastopen=1#NodeName' },
+                { name: 'VLESS',    key: 'vless',     example: 'vless://uuid@host:port?security=reality&pbk=publickey&sni=sni&fp=chrome&sid=shortid&type=tcp#NodeName' },
+                { name: 'Trojan',   key: 'trojan',    example: 'trojan://password@host:port?sni=xxx#NodeName' },
               ].map(p => (
-                <div key={p.name} className="space-y-1.5">
+                <div key={p.key} className="space-y-1.5">
                   <div className="text-sm font-medium text-blue-400">{p.name}</div>
                   <code className="block text-xs font-mono bg-gray-950 border border-gray-700 rounded px-3 py-2 text-gray-300 break-all">
                     {p.example}
                   </code>
-                  <p className="text-xs text-gray-500">{p.fields}</p>
+                  <p className="text-xs text-gray-500">{t(`protocolRef.fields.${p.key}`)}</p>
                 </div>
               ))}
             </div>
@@ -535,7 +505,7 @@ export default function Home() {
 
         <footer className="border-t border-gray-800 mt-12 py-6">
           <div className="max-w-5xl mx-auto px-4 text-center text-xs text-gray-600">
-            Mihomo Subconverter · 仅供个人使用 · 请遵守当地法律法规
+            {t('footer')}
           </div>
         </footer>
       </div>

@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "title": "Mihomo 订阅转换",
+    "description": "Clash / Mihomo 订阅链接转换工具，支持 Hysteria2、AnyTLS、VLESS 等协议"
+  },
+  "header": {
+    "title": "Mihomo 订阅转换",
+    "subtitle": "Clash Meta 配置生成器",
+    "credit": "感谢 ACL4SSR 提供规则集"
+  },
+  "step1": {
+    "title": "输入节点链接",
+    "extractedBadge": "已从订阅链接提取",
+    "nodeCount": "{{count}} 条节点",
+    "placeholder": "# 粘贴你的节点链接，每行一个，支持以下格式：\n# hysteria2://password@host:port?peer=sni&insecure=1#节点名称\n# anytls://password@host:port?peer=sni&insecure=1#节点名称\n# vless://uuid@host:port?security=reality&pbk=xxx&sni=xxx&fp=chrome&sid=xxx#节点名称\n# trojan://password@host:port?sni=xxx#节点名称\n# vmess://base64...\n# ss://method:password@host:port#节点名称",
+    "supported": "支持协议："
+  },
+  "step2": {
+    "title": "选择规则组",
+    "selectAll": "全选",
+    "clear": "清空"
+  },
+  "step3": {
+    "title": "自定义规则",
+    "optional": "（可选）",
+    "placeholder": "# 自定义规则，每行一条，优先于内置规则生效\n# 例如：\nDOMAIN-SUFFIX,example.com,🚀 节点选择\nIP-CIDR,1.2.3.4/32,DIRECT"
+  },
+  "generate": {
+    "button": "生成订阅配置",
+    "loading": "生成中...",
+    "errorEmpty": "请输入至少一条节点链接",
+    "errorFailed": "生成失败，请检查节点链接格式"
+  },
+  "result": {
+    "title": "生成结果",
+    "tabUrl": "订阅链接",
+    "tabYaml": "配置预览",
+    "urlDescription": "将以下链接填入 Clash / Mihomo 客户端的订阅地址栏：",
+    "copy": "复制",
+    "copied": "已复制",
+    "usageTitle": "使用说明",
+    "usageItems": [
+      "将订阅链接填入 Clash for Windows / Mihomo Party / Stash 等客户端",
+      "订阅链接会动态生成最新配置，节点更新后重新生成链接即可",
+      "规则组使用 ACL4SSR 规则，客户端首次加载时会自动下载"
+    ],
+    "yamlLines": "{{count}} 行配置",
+    "download": "下载 clash.yaml"
+  },
+  "protocolRef": {
+    "title": "节点链接格式参考",
+    "fields": {
+      "hysteria2": "peer/sni: SNI域名 · insecure: 跳过证书验证",
+      "anytls": "peer/sni: SNI域名 · fastopen: TCP快速打开 · fp: 指纹",
+      "vless": "pbk: 公钥 · sid: shortId · sni: SNI · fp: 指纹",
+      "trojan": "sni: SNI域名 · insecure: 跳过证书验证"
+    }
+  },
+  "footer": "Mihomo Subconverter · 仅供个人使用",
+  "rules": {
+    "BanAD":        { "label": "🛑 广告拦截",  "description": "广告拦截 + 应用净化" },
+    "GoogleFCM":    { "label": "📢 谷歌FCM",   "description": "Google Firebase 推送" },
+    "Microsoft":    { "label": "Ⓜ️ 微软服务", "description": "OneDrive + Microsoft 全系列" },
+    "Apple":        { "label": "🍎 苹果服务",  "description": "Apple 全系列" },
+    "Telegram":     { "label": "📲 电报消息",  "description": "Telegram" },
+    "OpenAI":       { "label": "💬 OpenAI",    "description": "ChatGPT / OpenAI" },
+    "NewBing":      { "label": "🤖 NewBing",   "description": "Microsoft Bing AI" },
+    "NetEaseMusic": { "label": "🎶 网易音乐",  "description": "网易云音乐" },
+    "Gaming":       { "label": "🎮 游戏平台",  "description": "EA / Epic / Origin / Sony / Steam / Nintendo" },
+    "TikTok":       { "label": "🎵 TikTok",    "description": "TikTok" },
+    "YouTube":      { "label": "📹 油管视频",  "description": "YouTube" },
+    "Netflix":      { "label": "🎥 奈飞视频",  "description": "Netflix" },
+    "Bahamut":      { "label": "📺 巴哈姆特",  "description": "巴哈姆特动画" },
+    "Bilibili":     { "label": "📺 哔哩哔哩",  "description": "B站" },
+    "ChinaMedia":   { "label": "🌏 国内媒体",  "description": "国内流媒体" },
+    "ForeignMedia": { "label": "🌍 国外媒体",  "description": "海外流媒体（YouTube/Netflix 之外）" }
+  }
+}
