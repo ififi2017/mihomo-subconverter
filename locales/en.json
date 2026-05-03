@@ -11,7 +11,7 @@
   "header": {
     "title": "Mihomo Subscription Converter",
     "subtitle": "Clash Config Generator",
-    "credit": "Thanks to ACL4SSR for rule sets"
+    "credit": "Powered by MetaCubeX meta-rules-dat"
   },
   "step1": {
     "title": "Proxy Node Links",
@@ -30,11 +30,11 @@
     "templateLabel": "Custom Template URL",
     "templateOptional": "(optional)",
     "templatePlaceholder": "https://example.com/my-template.ini",
-    "templateDescription": "Leave empty for the default ACL4SSR Full template. Compatible with",
+    "templateDescription": "Leave empty for the default MetaCubeX Full template. Compatible with",
     "templateDescriptionSubweb": "sub-web remote config",
     "templateDescriptionSuffix": "URLs.",
     "templateViewExample": "View example template",
-    "templateDefault": "Default: ACL4SSR Full Template"
+    "templateDefault": "Default: MetaCubeX Full Template"
   },
   "step3": {
     "title": "Custom Rules",
@@ -48,7 +48,7 @@
       "Click Generate — a live subscription URL is created on your deploy",
       "Paste the URL into Clash Verge / Clash Party / Clash Mi"
     ],
-    "footnote": "Rule sets are powered by {acl4ssr} and downloaded by your client on first load."
+    "footnote": "Rule sets are powered by {metacubex} and downloaded by your client on first load."
   },
   "generate": {
     "button": "Generate Config",

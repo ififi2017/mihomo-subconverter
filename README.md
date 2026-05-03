@@ -6,7 +6,7 @@
 
 A lightweight Mihomo / Clash subscription converter. Paste your proxy node links, choose a rule template, and get a ready-to-use configuration file — deployable to Vercel in one click.
 
-> Rule sets are based on [ACL4SSR](https://github.com/ACL4SSR/ACL4SSR). Protocol parsing patterns reference [sublink-worker](https://github.com/7Sageer/sublink-worker) by 7Sageer. Thanks to both projects.
+> Rule sets are powered by [MetaCubeX/meta-rules-dat](https://github.com/MetaCubeX/meta-rules-dat) in `.mrs` binary format. Template format follows the [ACL4SSR](https://github.com/ACL4SSR/ACL4SSR) / sub-web INI convention for compatibility. Protocol parsing patterns reference [sublink-worker](https://github.com/7Sageer/sublink-worker) by 7Sageer.
 
 ---
 
@@ -30,7 +30,7 @@ Subscription URLs are also supported — paste any `https://` link that returns 
 
 - **Multi-protocol** — Hysteria2, AnyTLS, VLESS, Trojan, VMess, Shadowsocks, TUIC
 - **Subscription URL import** — Paste a subscription URL; nodes are extracted automatically
-- **INI rule templates** — Built-in ACL4SSR Full template, or point to any compatible `.ini` file
+- **INI rule templates** — Built-in MetaCubeX Full template, or point to any compatible `.ini` file
 - **sub-web compatible** — Template URLs work with [CareyWang/sub-web](https://github.com/CareyWang/sub-web) remote config links without modification
 - **Custom rules** — Prepend your own `DOMAIN-SUFFIX` / `IP-CIDR` rules at highest priority
 - **Live subscription URL** — Generated link always reflects your current proxy list; paste it once into any Mihomo-compatible client
@@ -64,7 +64,7 @@ Open http://localhost:3000
 ## Usage
 
 1. **Paste nodes** — Add proxy links one per line, or paste a subscription URL (nodes are extracted automatically)
-2. **Rule template** *(optional)* — Leave empty to use the default ACL4SSR Full template, or paste a URL to your own `.ini` file
+2. **Rule template** *(optional)* — Leave empty to use the default MetaCubeX Full template, or paste a URL to your own `.ini` file
 3. **Custom rules** *(optional)* — Add rules that take priority over all built-in ones
 4. **Generate** — Click **Generate Config** or press `Ctrl / ⌘ + Enter`
 5. **Use it** — Copy the subscription link into your client's remote profile URL field
@@ -73,12 +73,12 @@ Open http://localhost:3000
 
 ## Rule Templates
 
-The converter uses an ACL4SSR-style INI file to define proxy groups and rule sets.
+The converter uses an ACL4SSR-compatible INI file to define proxy groups and rule sets.
 
 **Default template** (used when the Custom Template URL field is left empty):
 
 ```
-https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/ACL4SSR_Online_Full.ini
+https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/MetaCubeX_Full.ini
 ```
 
 Open the link above to see a working example of the expected format — it's a good starting point for writing your own template.
@@ -90,7 +90,7 @@ Open the link above to see a working example of the expected format — it's a g
 3. Host the file on GitHub (raw URL), any CDN, or a static file server
 4. Paste the URL into the **Custom Template URL** field in the UI
 
-**sub-web compatibility:** The template format follows the ACL4SSR / sub-web INI convention — any remote config URL that works in [CareyWang/sub-web](https://sub-web.pages.dev/) ([GitHub](https://github.com/CareyWang/sub-web)) under "远程配置" will also work here without modification.
+**sub-web compatibility:** The template format follows the ACL4SSR / sub-web INI convention — any remote config URL that works in [CareyWang/sub-web](https://sub-web.pages.dev/) ([GitHub](https://github.com/CareyWang/sub-web)) under "远程配置" will also work here without modification. Both `.list` and `.mrs` rule formats are supported.
 
 ### Template format reference
 
@@ -103,7 +103,9 @@ custom_proxy_group=♻️ Auto Select`url-test`.*`http://www.gstatic.com/generat
 custom_proxy_group=🇭🇰 HK Nodes`url-test`(HK|Hong Kong|港)`http://www.gstatic.com/generate_204`300,,50
 
 ; Rule sets — GROUP,URL  or  GROUP,[]INLINE_RULE
-ruleset=🛑 AdBlock,https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list
+; .list (classical text) and .mrs (MetaCubeX binary) are both supported
+ruleset=🛑 AdBlock,https://example.com/rules/ban.list
+ruleset=🎯 Direct,https://example.com/rules/cn.mrs
 ruleset=🎯 Direct,[]GEOIP,CN
 ruleset=🐟 Catch-all,[]FINAL
 ```
@@ -136,7 +138,7 @@ GET /api/clash?config=<encoded_links>[&template=<encoded_url>][&customRules=<jso
 | Parameter | Description |
 |-----------|-------------|
 | `config` | URL-encoded proxy links, separated by newlines or `\|` |
-| `template` | URL-encoded `.ini` template URL (optional, defaults to ACL4SSR Full) |
+| `template` | URL-encoded `.ini` template URL (optional, defaults to MetaCubeX Full) |
 | `customRules` | JSON array of custom rule strings (optional) |
 
 **Example:**

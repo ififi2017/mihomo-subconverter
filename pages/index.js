@@ -594,7 +594,7 @@ export default function Home() {
                 </a>
                 <span>{t('step2.templateDescriptionSuffix')}</span>
                 <span className="text-gray-300 dark:text-gray-700">·</span>
-                <a href="https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/ACL4SSR_Online_Full.ini"
+                <a href="https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/MetaCubeX_Full.ini"
                   target="_blank" rel="noopener noreferrer"
                   className="text-blue-500 dark:text-blue-400 hover:underline">
                   {t('step2.templateViewExample')}
@@ -722,11 +722,11 @@ export default function Home() {
                 </ul>
                 <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                   <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed">
-                    {t('guide.footnote').split('{acl4ssr}').map((part, i) =>
+                    {t('guide.footnote').split('{metacubex}').map((part, i) =>
                       i === 0 ? part : (
                         <span key={i}>
-                          <a href="https://github.com/ACL4SSR/ACL4SSR" target="_blank" rel="noopener noreferrer"
-                            className="text-blue-500 dark:text-blue-400 hover:underline">ACL4SSR</a>
+                          <a href="https://github.com/MetaCubeX/meta-rules-dat" target="_blank" rel="noopener noreferrer"
+                            className="text-blue-500 dark:text-blue-400 hover:underline">MetaCubeX</a>
                           {part}
                         </span>
                       )

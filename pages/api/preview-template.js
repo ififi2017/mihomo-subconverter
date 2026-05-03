@@ -1,7 +1,7 @@
 /**
  * GET /api/preview-template?url=<optional-encoded-url>
  *
- * Fetches an ACL4SSR-style INI template and returns the list of
+ * Fetches a MetaCubeX-style INI template and returns the list of
  * toggleable rule-group names (groups that have URL-based rulesets).
  *
  * Response: { groups: string[] }
@@ -9,7 +9,7 @@
 import { parseIni } from '../../lib/iniParser'
 
 const DEFAULT_TEMPLATE_URL =
-  'https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/ACL4SSR_Online_Full.ini'
+  'https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/MetaCubeX_Full.ini'
 
 export default async function handler(req, res) {
   const { url } = req.query

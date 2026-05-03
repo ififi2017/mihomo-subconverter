@@ -2,10 +2,10 @@ import { parseProxyLinks } from '../../lib/parser'
 import { generateClashConfigFromIni } from '../../lib/generator'
 import { parseIni } from '../../lib/iniParser'
 
-// Default template — ACL4SSR Full (hosted in the project's own rules repo).
+// Default template — MetaCubeX Full (hosted in the project's own rules repo).
 // Users can override this via the `template` query parameter.
 const DEFAULT_TEMPLATE_URL =
-  'https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/ACL4SSR_Online_Full.ini'
+  'https://raw.githubusercontent.com/ififi2017/clash_rules/master/config/MetaCubeX_Full.ini'
 
 export default async function handler(req, res) {
   const { config, template, customRules, groups } = req.query
