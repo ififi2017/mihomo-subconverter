@@ -44,6 +44,19 @@ describe('validateTemplateUrl', () => {
     // must be a dot-boundary suffix, not a substring
     expect(validateTemplateUrl('https://notexample.org/a.ini')).toBeNull()
   })
+
+  it('rejects short-form, hex, decimal IPv4 and trailing-dot localhost', () => {
+    for (const bad of [
+      'http://127.1/x',
+      'http://127.0.1/x',
+      'http://0x7f000001/x',
+      'http://2130706433/x',
+      'http://localhost./x',
+      'http://localhost.:80/x',
+    ]) {
+      expect(validateTemplateUrl(bad), bad).toBeNull()
+    }
+  })
 })
 
 describe('fetchTextCapped', () => {
@@ -117,6 +130,19 @@ describe('fetchTextCapped', () => {
     const body = await fetchTextCapped('http://example.com/small', { maxBytes: 200, timeoutMs: 5000 })
     expect(body.length).toBeGreaterThan(0)
     expect(body).toBe('hello world')
+    global.fetch = originalFetch
+  })
+
+  it('blocks a redirect to a private address', async () => {
+    const originalFetch = global.fetch
+    global.fetch = async (url) => ({
+      ok: false,
+      status: 302,
+      headers: { get: (h) => (h === 'location' ? 'http://127.0.0.1/secret' : null) },
+    })
+    await expect(
+      fetchTextCapped('https://open.example.com/tpl.ini', { maxBytes: 100, timeoutMs: 5000 }),
+    ).rejects.toThrow(/redirect blocked/i)
     global.fetch = originalFetch
   })
 })

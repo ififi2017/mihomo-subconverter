@@ -5,8 +5,9 @@ import { useI18n, LOCALES } from '../lib/i18n'
 import { useTheme } from '../lib/theme'
 import {
   LS_KEY_PROXY_LINKS, LS_KEY_TEMPLATE_URL, LS_KEY_ACCESS_TOKEN,
-  PROXY_PREFIXES,
+  LS_KEY_CUSTOM_RULES,
 } from '../lib/constants'
+import { expandPastedInput } from '../lib/parser'
 import pkg from '../package.json'
 import ThemeToggle from '../components/ThemeToggle'
 import ProxyInput from '../components/ProxyInput'
@@ -18,6 +19,7 @@ import { Card, secBtnCls } from '../components/UI'
 const LS_KEY          = LS_KEY_PROXY_LINKS
 const LS_KEY_TEMPLATE = LS_KEY_TEMPLATE_URL
 const LS_KEY_TOKEN    = LS_KEY_ACCESS_TOKEN
+const LS_KEY_RULES    = LS_KEY_CUSTOM_RULES
 
 function getSavedToken() {
   try { return localStorage.getItem(LS_KEY_TOKEN) || '' } catch { return '' }
@@ -143,8 +145,10 @@ export default function Home() {
     try {
       const sl = localStorage.getItem(LS_KEY)
       const st = localStorage.getItem(LS_KEY_TEMPLATE)
+      const sr = localStorage.getItem(LS_KEY_RULES)
       if (sl) setProxyLinks(sl)
       if (st) setTemplateUrl(st)
+      if (sr) setCustomRules(sr)
     } catch { }
     setAccessToken(getSavedToken())
     setIsMac(/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent))
@@ -216,27 +220,11 @@ export default function Home() {
   /* ── Input handlers ───────────────────────────────────────────── */
 
   const handleProxyInput = useCallback((raw) => {
-    const trimmed = raw.trim()
-    if (/^https?:\/\//.test(trimmed) && !trimmed.includes('\n')) {
-      try {
-        const url    = new URL(trimmed)
-        const config = url.searchParams.get('config')
-        if (config) {
-          const lines = decodeURIComponent(config).split(/\n|\|/)
-            .map(l => l.trim()).filter(l => PROXY_PREFIXES.some(p => l.startsWith(p)))
-          if (lines.length > 0) {
-            const joined = lines.join('\n')
-            setProxyLinks(joined)
-            try { localStorage.setItem(LS_KEY, joined) } catch { }
-            setExtractedFrom(trimmed)
-            setError(''); return
-          }
-        }
-      } catch { }
-    }
-    setProxyLinks(raw)
-    try { localStorage.setItem(LS_KEY, raw) } catch { }
-    setExtractedFrom('')
+    const { text, kind } = expandPastedInput(raw)
+    setProxyLinks(text)
+    try { localStorage.setItem(LS_KEY, text) } catch { }
+    setExtractedFrom(kind)
+    if (kind) setError('')
   }, [])
 
   const handleTemplateInput = useCallback((val) => {
@@ -247,6 +235,11 @@ export default function Home() {
   const handleTokenInput = useCallback((val) => {
     setAccessToken(val)
     try { localStorage.setItem(LS_KEY_TOKEN, val) } catch { }
+  }, [])
+
+  const handleCustomRulesInput = useCallback((val) => {
+    setCustomRules(val)
+    try { localStorage.setItem(LS_KEY_RULES, val) } catch { }
   }, [])
 
   const toggleGroup = useCallback((name) => {
@@ -278,15 +271,32 @@ export default function Home() {
 
   /* ── Generate ─────────────────────────────────────────────────── */
   const handleGenerate = useCallback(async () => {
-    const links = proxyLinks.trim().split('\n')
-      .filter(l => l.trim() && !l.trim().startsWith('#')).join('\n')
+    const links = proxyLinks.trim()
     if (!links) { setError(t('generate.errorEmpty')); return }
     setError('')
     setLoading(true)
     try {
       const url = buildApiUrl(window.location.origin)
       if (!url) { setError(t('generate.errorEmpty')); setLoading(false); return }
-      const res = await fetch(url)
+      const body = { config: links }
+      if (accessToken.trim()) body.token = accessToken.trim()
+      if (templateUrl.trim()) body.template = templateUrl.trim()
+      if (selectedGroups !== null && ruleGroups.length > 0 &&
+          selectedGroups.size < ruleGroups.length) {
+        body.groups = Array.from(selectedGroups)
+      }
+      const customList = customRules.trim().split('\n')
+        .filter(l => l.trim() && !l.trim().startsWith('#'))
+      if (customList.length > 0) body.customRules = customList
+
+      const postUrl = accessToken.trim()
+        ? `/api/clash?token=${encodeURIComponent(accessToken.trim())}`
+        : '/api/clash'
+      const res = await fetch(postUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
       if (!res.ok) throw new Error(await res.text())
       setYamlPreview(await res.text())
       setSubUrl(url)
@@ -297,7 +307,7 @@ export default function Home() {
     } finally {
       setLoading(false)
     }
-  }, [proxyLinks, buildApiUrl, t])
+  }, [proxyLinks, templateUrl, selectedGroups, ruleGroups, customRules, accessToken, buildApiUrl, t])
 
   useEffect(() => {
     const h = (e) => {
@@ -458,7 +468,7 @@ export default function Home() {
 
           {/* ── Steps 3 + 4 side by side ─────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CustomRules value={customRules} onChange={setCustomRules} t={t} />
+            <CustomRules value={customRules} onChange={handleCustomRulesInput} t={t} />
             <GuidePanel t={t} />
           </div>
 

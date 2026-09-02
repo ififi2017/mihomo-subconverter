@@ -1,10 +1,24 @@
 import { parseProxyLinks } from '../../lib/parser'
 import { generateClashConfigFromIni } from '../../lib/generator'
 import { parseIni } from '../../lib/iniParser'
-import { validateTemplateUrl, fetchTextCapped } from '../../lib/safeFetch'
+import { validateTemplateUrl } from '../../lib/safeFetch'
 import { checkAccessToken } from '../../lib/auth'
 import { cacheKey, cacheGet, cacheSet } from '../../lib/cache'
 import { DEFAULT_TEMPLATE_URL } from '../../lib/constants'
+import { loadTemplateIni } from '../../lib/templateResolve'
+import { isDefaultTemplateUrl } from '../../lib/githubMirror'
+
+function parseJsonArray(value) {
+  if (!value) return null
+  if (Array.isArray(value)) return value
+  if (typeof value !== 'string') return null
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
@@ -20,7 +34,7 @@ export default async function handler(req, res) {
   // Decoding again would corrupt values containing literal '%' characters.
   // POST accepts a JSON body with the same field names.
   const { config, template, customRules, groups } = req.method === 'POST'
-    ? (typeof req.body === 'object' ? req.body : {})
+    ? (typeof req.body === 'object' && req.body ? req.body : {})
     : req.query
 
   if (!config) {
@@ -28,17 +42,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ── Parse proxy links ────────────────────────────────────────────────
-    const proxies = parseProxyLinks(config)
+    const proxies = parseProxyLinks(typeof config === 'string' ? config : String(config))
 
     if (proxies.length === 0) {
       return res
         .status(400)
-        .send('No valid proxy links found. Supported: hysteria2://, anytls://, vless://, trojan://, vmess://, ss://, tuic://')
+        .send('No valid proxy links found. Supported: hysteria2://, anytls://, vless://, trojan://, vmess://, ss://, tuic://, Clash YAML proxies, or a base64 subscription')
     }
 
-    // ── Resolve INI template URL ─────────────────────────────────────────
     let templateUrl = DEFAULT_TEMPLATE_URL
+    let isDefault = true
     if (template) {
       const validated = validateTemplateUrl(template)
       if (!validated) {
@@ -48,52 +61,35 @@ export default async function handler(req, res) {
                 (process.env.TEMPLATE_ALLOWED_HOSTS ? ' (host not in allowlist)' : ''))
       }
       templateUrl = validated
+      isDefault = isDefaultTemplateUrl(validated)
     }
 
-    // ── Parse selected groups ─────────────────────────────────────────────
-    let selectedGroups = null   // null = include all
-    if (groups) {
-      try {
-        const parsed = JSON.parse(groups)
-        if (Array.isArray(parsed)) selectedGroups = new Set(parsed.map(String))
-      } catch {
-        // malformed — include all
-      }
-    }
+    let selectedGroups = null
+    const parsedGroups = parseJsonArray(groups)
+    if (parsedGroups) selectedGroups = new Set(parsedGroups.map(String))
 
-    // ── Try cache lookup ───────────────────────────────────────────────────
     const ckey = cacheKey(config, template, customRules, groups)
     const cached = cacheGet(ckey)
-    if (cached) {
+    if (cached?.yaml) {
       res.setHeader('Content-Type', 'application/x-yaml; charset=utf-8')
       res.setHeader('Content-Disposition', 'attachment; filename=clash.yaml')
       res.setHeader('X-Cache', 'HIT')
       return res.status(200).send(cached.yaml)
     }
 
-    // ── Fetch INI template with stale fallback ─────────────────────────────
-    let iniText
+    let loaded
     try {
-      iniText = await fetchTextCapped(templateUrl)
+      loaded = await loadTemplateIni(templateUrl, { isDefault })
     } catch (e) {
-      // If the template fetch fails, serve stale cached data if available
-      const stale = cacheGet(ckey)
-      if (stale) {
-        res.setHeader('Content-Type', 'application/x-yaml; charset=utf-8')
-        res.setHeader('Content-Disposition', 'attachment; filename=clash.yaml')
-        res.setHeader('Warning', '299 mihomo-subconverter "stale config — template fetch failed"')
-        return res.status(200).send(stale.yaml)
-      }
       return res
         .status(502)
         .send(
-          `Failed to fetch rule template from ${templateUrl}: ${e.message}\n` +
-          `Please check the URL or try again later.`
+          `Failed to fetch rule template: ${e.message}\n` +
+          `Please check the URL or try again later.`,
         )
     }
 
-    // ── Parse INI ────────────────────────────────────────────────────────
-    const parsedIni = parseIni(iniText)
+    const parsedIni = parseIni(loaded.ini)
 
     if (parsedIni.proxyGroups.length === 0 && parsedIni.rulesets.length === 0) {
       return res
@@ -101,21 +97,19 @@ export default async function handler(req, res) {
         .send('Rule template appears to be empty or in an unsupported format.')
     }
 
-    // ── Parse custom rules ────────────────────────────────────────────────
     let customRulesList = []
     if (customRules) {
-      let parsed = null
-      try { parsed = JSON.parse(customRules) } catch { }
-      const arr = Array.isArray(parsed) ? parsed : String(customRules).split('\n')
+      const parsed = parseJsonArray(customRules)
+      const arr = parsed || String(customRules).split('\n')
       customRulesList = arr
         .map(r => String(r).replace(/[\r\n]+/g, ' ').trim())
         .filter(Boolean)
     }
 
-    // ── Generate YAML ─────────────────────────────────────────────────────
-    const yaml = generateClashConfigFromIni(proxies, parsedIni, customRulesList, templateUrl, selectedGroups)
+    const yaml = generateClashConfigFromIni(
+      proxies, parsedIni, customRulesList, loaded.source, selectedGroups,
+    )
 
-    // Store in cache for subsequent requests
     cacheSet(ckey, { yaml })
 
     res.setHeader('Content-Type', 'application/x-yaml; charset=utf-8')

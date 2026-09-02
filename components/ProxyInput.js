@@ -1,4 +1,5 @@
 import { Card, CardHeader, StepBadge, inputCls } from './UI'
+import { parseProxyLinks } from '../lib/parser'
 import { PROXY_PREFIXES } from '../lib/constants'
 
 /* ── Protocol badge colors [bg, text, border] ─────────────────────── */
@@ -31,22 +32,24 @@ function ProtoBadge({ proto, count }) {
 }
 
 function analyzeProxies(proxyLinks) {
-  const MAP = {
-    'hysteria2://':'hy2','hy2://':'hy2','anytls://':'anytls',
-    'vless://':'vless','trojan://':'trojan','vmess://':'vmess',
-    'ss://':'ss','tuic://':'tuic',
-  }
+  const parsed = parseProxyLinks(proxyLinks)
   const counts = {}
+  for (const p of parsed) {
+    const k = p.type === 'hysteria2' ? 'hy2' : p.type
+    counts[k] = (counts[k] || 0) + 1
+  }
   let invalid = 0
-  for (const line of proxyLinks.split('\n')) {
-    const l = line.trim()
-    if (!l || l.startsWith('#')) continue
-    const proto = Object.entries(MAP).find(([pfx]) => l.startsWith(pfx))?.[1]
-    if (proto) counts[proto] = (counts[proto] || 0) + 1
-    else invalid++
+  const looksStructured = /^proxies:\s*$/m.test(proxyLinks)
+  if (!looksStructured) {
+    for (const line of proxyLinks.split('\n')) {
+      const l = line.trim()
+      if (!l || l.startsWith('#')) continue
+      const proto = PROXY_PREFIXES.some(pfx => l.startsWith(pfx))
+      if (!proto) invalid++
+    }
   }
   return {
-    total: Object.values(counts).reduce((a, b) => a + b, 0),
+    total: parsed.length,
     breakdown: Object.entries(counts),
     invalid,
   }
@@ -72,7 +75,11 @@ export default function ProxyInput({ value, onChange, extractedFrom, t }) {
               <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
               </svg>
-              {t('step1.extractedBadge')}
+              {t(
+                extractedFrom === 'base64' ? 'step1.extractedBase64'
+                : extractedFrom === 'yaml' ? 'step1.extractedYaml'
+                : 'step1.extractedBadge',
+              )}
             </span>
           )}
           {invalid > 0 && (

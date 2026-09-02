@@ -2,6 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
 
+  outputFileTracingIncludes: {
+    '/api/clash': ['./templates/MetaCubeX_Full.ini'],
+    '/api/preview-template': ['./templates/MetaCubeX_Full.ini'],
+  },
+
   async headers() {
     return [
       {

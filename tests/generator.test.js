@@ -96,4 +96,82 @@ describe('generateClashConfigFromIni', () => {
     const yaml = generateClashConfigFromIni(vmessProxy, INI, [], '')
     expect(yaml).not.toContain('alterId')
   })
+
+  it('emits previously dropped protocol fields', () => {
+    const proxies = [
+      {
+        name: 'HY2', type: 'hysteria2', server: 'h.example.com', port: 443,
+        password: 'pw', obfs: 'salamander', 'obfs-password': 'ob', udp: true,
+      },
+      {
+        name: 'SS', type: 'ss', server: 's.example.com', port: 8388,
+        cipher: 'aes-128-gcm', password: 'pw', plugin: 'obfs',
+        'plugin-opts': { mode: 'http', host: 'example.com' }, udp: true,
+      },
+      {
+        name: 'TUIC', type: 'tuic', server: 't.example.com', port: 443,
+        uuid: 'u', password: 'p', alpn: ['h3', 'spdy'],
+        'congestion-controller': 'bbr', 'udp-relay-mode': 'native',
+        'reduce-rtt': true, udp: true,
+      },
+      {
+        name: 'VM-HTTP', type: 'vmess', server: 'v.example.com', port: 80,
+        uuid: 'id', cipher: 'auto', network: 'http',
+        'http-opts': { method: 'GET', path: ['/'], headers: { Host: ['cdn.example.com'] } },
+        udp: true,
+      },
+      {
+        name: 'VLESS-X', type: 'vless', server: 'x.example.com', port: 443,
+        uuid: 'id', tls: true, network: 'xhttp',
+        'xhttp-opts': { path: '/api', host: 'cdn.example.com', mode: 'auto' },
+        udp: true,
+      },
+    ]
+    const out = generateClashConfigFromIni(proxies, INI, [], '')
+    expect(out).toContain('obfs: salamander')
+    expect(out).toContain('obfs-password: ob')
+    expect(out).toContain('plugin: obfs')
+    expect(out).toMatch(/plugin-opts:[\s\S]*mode: http/)
+    expect(out).toMatch(/alpn:[\s\S]*- h3[\s\S]*- spdy/)
+    expect(out).toContain('congestion-controller: bbr')
+    expect(out).toContain('udp-relay-mode: native')
+    expect(out).toContain('reduce-rtt: true')
+    expect(out).toMatch(/http-opts:[\s\S]*method: GET/)
+    expect(out).toMatch(/xhttp-opts:[\s\S]*path: \/api/)
+    expect(out).toContain('network: xhttp')
+  })
+
+  it('suffixes duplicate proxy names', () => {
+    const dup = [
+      { name: 'HK', type: 'trojan', server: 'a.example.com', port: 443, password: 'a' },
+      { name: 'HK', type: 'trojan', server: 'b.example.com', port: 443, password: 'b' },
+    ]
+    const out = generateClashConfigFromIni(dup, INI, [], '')
+    expect(out).toContain('- name: HK\n')
+    expect(out).toContain('- name: HK 2\n')
+  })
+
+  it('rewrites GitHub raw and gh-proxy ruleset URLs to testingcf.jsdelivr', () => {
+    const ini = {
+      proxyGroups: INI.proxyGroups,
+      rulesets: [
+        { group: '🚀 节点选择', url: 'https://raw.githubusercontent.com/ififi2017/clash_rules/master/rules/apple.list' },
+        { group: '💬 AI 服务', url: 'https://gh-proxy.com/https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/youtube.mrs' },
+        { group: '🎯 全球直连', inline: 'GEOIP,CN' },
+        { group: '🐟 漏网之鱼', inline: 'FINAL' },
+      ],
+    }
+    const out = generateClashConfigFromIni(PROXIES, ini, [], '')
+    expect(out).toContain('https://testingcf.jsdelivr.net/gh/ififi2017/clash_rules@master/rules/apple.list')
+    expect(out).toContain('https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/youtube.mrs')
+    expect(out).not.toContain('raw.githubusercontent.com')
+    expect(out).not.toContain('gh-proxy.com')
+    expect(out).toContain('geosite-youtube:')
+  })
+
+  it('uses China-reachable geox-url constants, not GitHub releases', () => {
+    expect(yaml).toContain('testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb')
+    expect(yaml).not.toContain('github.com/xishang0128')
+    expect(yaml).not.toContain('releases/download')
+  })
 })

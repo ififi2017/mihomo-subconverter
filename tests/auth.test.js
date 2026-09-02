@@ -45,4 +45,10 @@ describe('checkAccessToken', () => {
     expect(checkAccessToken({ query: { token: ['array'] } })).toBe(false)
     expect(checkAccessToken({ query: { token: 123 } })).toBe(false)
   })
+
+  it('accepts a matching token from the JSON body', () => {
+    process.env.ACCESS_TOKEN = 'my-secret-token'
+    expect(checkAccessToken({ query: {}, body: { token: 'my-secret-token' } })).toBe(true)
+    expect(checkAccessToken({ query: {}, body: { token: 'wrong' } })).toBe(false)
+  })
 })

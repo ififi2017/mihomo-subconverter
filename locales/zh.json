@@ -16,9 +16,11 @@
   "step1": {
     "title": "输入节点链接",
     "extractedBadge": "已从订阅链接提取",
+    "extractedBase64": "已从 Base64 订阅解码",
+    "extractedYaml": "已导入 Clash YAML 节点",
     "nodeCount": "{{count}} 条节点",
     "invalidLines": "{{count}} 行未识别",
-    "placeholder": "# 粘贴你的节点链接，每行一个，支持以下格式：\n# hysteria2://password@host:port?peer=sni&insecure=1#节点名称\n# anytls://password@host:port?peer=sni&insecure=1#节点名称\n# vless://uuid@host:port?security=reality&pbk=xxx&sni=xxx&fp=chrome&sid=xxx#节点名称\n# trojan://password@host:port?sni=xxx#节点名称\n# vmess://base64...\n# ss://method:password@host:port#节点名称",
+    "placeholder": "# 粘贴节点 URI（每行一个）、本工具生成的链接、Base64 订阅，或 Clash YAML 的 proxies 段：\n# hysteria2://password@host:port?peer=sni&insecure=1#节点名称\n# anytls://password@host:port?peer=sni&insecure=1#节点名称\n# vless://uuid@host:port?type=xhttp&security=tls&sni=xxx#节点名称\n# trojan://password@host:port?sni=xxx#节点名称\n# vmess://base64...\n# ss://method:password@host:port#节点名称",
     "supported": "支持协议："
   },
   "step2": {
@@ -31,7 +33,7 @@
     "templateLabel": "自定义模板链接",
     "templateOptional": "（可选）",
     "templatePlaceholder": "https://example.com/my-template.ini",
-    "templateDescription": "留空使用默认模板（MetaCubeX Full）。兼容",
+    "templateDescription": "留空使用默认模板（MetaCubeX Full，jsDelivr，国内可访问）。兼容",
     "templateDescriptionSubweb": "sub-web 远程配置",
     "templateDescriptionSuffix": "链接。",
     "templateViewExample": "查看示例模板",
@@ -45,11 +47,11 @@
   "guide": {
     "title": "使用指南",
     "items": [
-      "粘贴节点链接，或粘贴本工具生成的订阅链接（自动提取其中的节点）",
+      "粘贴节点链接、本工具生成的订阅、Base64 订阅或 Clash YAML 节点（均在本地解析，不请求机场）",
       "点击生成，即可在你的部署上创建一个实时订阅链接",
       "将订阅链接填入 Clash Verge / Clash Party / Clash Mi 等客户端"
     ],
-    "footnote": "规则集由 {metacubex} 提供，客户端首次加载时自动下载。"
+    "footnote": "规则集由 {metacubex} 提供，默认经 jsDelivr（testingcf）分发，便于国内客户端下载。"
   },
   "generate": {
     "button": "生成订阅配置",
