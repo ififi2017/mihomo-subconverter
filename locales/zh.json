@@ -4,9 +4,9 @@
     "description": "Clash / Mihomo 订阅链接转换工具，支持 Hysteria2、AnyTLS、VLESS 等协议"
   },
   "theme": {
-    "auto":  "自动",
+    "auto": "自动",
     "light": "浅色",
-    "dark":  "深色"
+    "dark": "深色"
   },
   "header": {
     "title": "Mihomo 订阅转换",
@@ -16,9 +16,11 @@
   "step1": {
     "title": "输入节点链接",
     "extractedBadge": "已从订阅链接提取",
+    "extractedBase64": "已从 Base64 订阅解码",
+    "extractedYaml": "已导入 Clash YAML 节点",
     "nodeCount": "{{count}} 条节点",
     "invalidLines": "{{count}} 行未识别",
-    "placeholder": "# 粘贴你的节点链接，每行一个，支持以下格式：\n# hysteria2://password@host:port?peer=sni&insecure=1#节点名称\n# anytls://password@host:port?peer=sni&insecure=1#节点名称\n# vless://uuid@host:port?security=reality&pbk=xxx&sni=xxx&fp=chrome&sid=xxx#节点名称\n# trojan://password@host:port?sni=xxx#节点名称\n# vmess://base64...\n# ss://method:password@host:port#节点名称",
+    "placeholder": "# 粘贴节点 URI（每行一个）、本工具生成的链接、Base64 订阅，或 Clash YAML 的 proxies 段：\n# hysteria2://password@host:port?peer=sni&insecure=1#节点名称\n# anytls://password@host:port?peer=sni&insecure=1#节点名称\n# vless://uuid@host:port?type=xhttp&security=tls&sni=xxx#节点名称\n# trojan://password@host:port?sni=xxx#节点名称\n# vmess://base64...\n# ss://method:password@host:port#节点名称",
     "supported": "支持协议："
   },
   "step2": {
@@ -31,7 +33,7 @@
     "templateLabel": "自定义模板链接",
     "templateOptional": "（可选）",
     "templatePlaceholder": "https://example.com/my-template.ini",
-    "templateDescription": "留空使用默认模板（MetaCubeX Full）。兼容",
+    "templateDescription": "留空使用默认模板（MetaCubeX Full，jsDelivr，国内可访问）。兼容",
     "templateDescriptionSubweb": "sub-web 远程配置",
     "templateDescriptionSuffix": "链接。",
     "templateViewExample": "查看示例模板",
@@ -45,11 +47,11 @@
   "guide": {
     "title": "使用指南",
     "items": [
-      "粘贴节点链接，或粘贴本工具生成的订阅链接（自动提取其中的节点）",
+      "粘贴节点链接、本工具生成的订阅、Base64 订阅或 Clash YAML 节点（均在本地解析，不请求机场）",
       "点击生成，即可在你的部署上创建一个实时订阅链接",
       "将订阅链接填入 Clash Verge / Clash Party / Clash Mi 等客户端"
     ],
-    "footnote": "规则集由 {metacubex} 提供，客户端首次加载时自动下载。"
+    "footnote": "规则集由 {metacubex} 提供，默认经 jsDelivr（testingcf）分发，便于国内客户端下载。"
   },
   "generate": {
     "button": "生成订阅配置",
@@ -88,5 +90,68 @@
     "title": "发现新版本",
     "body": "v{{version}} 已发布，点击查看"
   },
-  "footer": "Mihomo Subconverter · 仅供个人使用"
+  "footer": "Mihomo Subconverter · 仅供个人使用",
+  "studio": {
+    "workspace": "转换工作台",
+    "help": "使用指南",
+    "eyebrow": "精简流程 · 自由连接",
+    "heroTitle": "让连接，",
+    "heroAccent": "井然有序。",
+    "heroDescription": "从节点到配置，一步就绪。为你的 Mihomo 打造恰到好处的连接。",
+    "heroTag": "为 MIHOMO 而生",
+    "workspaceLabel": "配置工作区",
+    "workspaceHint": "你的连接，由你定义",
+    "nodeSubtitle": "所有连接，从这里开始",
+    "source": "原始输入",
+    "nodeList": "节点列表",
+    "inputPlaceholder": "在此粘贴你的节点链接…\n\n支持 URI、Base64 订阅、Clash YAML\n或本工具生成的订阅链接\n\n# 每行一个节点，自动识别协议",
+    "noNodes": "粘贴链接后，在这里查看已识别的节点。",
+    "awaitingInput": "等待输入节点",
+    "invalidAt": "第 {{lines}} 行无法解析，请检查链接格式",
+    "localParsing": "输入在浏览器本地解析",
+    "protocols": "种协议",
+    "rulesSubtitle": "为每一种流量，安排合适的去向",
+    "customTemplate": "自定义规则模板",
+    "customTemplateHint": "使用你的远程 INI 配置",
+    "defaultTemplateHint": "全场景分流 · 默认规则模板",
+    "configure": "配置",
+    "reset": "恢复默认",
+    "searchGroups": "搜索规则组…",
+    "noGroups": "没有匹配的规则组",
+    "rulesHint": "默认全选；取消勾选可精简生成的配置。",
+    "customRulesHint": "添加优先于模板生效的分流规则",
+    "ruleCount": "{{count}} 条规则",
+    "outputTitle": "准备好，下一次连接。",
+    "outputSubtitle": "检查配置，生成你的专属订阅",
+    "nodes": "节点",
+    "groups": "规则组",
+    "customRules": "自定义",
+    "template": "当前模板",
+    "generateHint": "生成时将节点提交到当前部署",
+    "standby": "等待生成",
+    "ready": "已就绪",
+    "outdated": "待重新生成",
+    "building": "正在构建你的配置",
+    "buildingHint": "正在请求配置，请稍候…",
+    "emptyTitle": "连接的下一站，在这里。",
+    "emptyHint": "添加节点并选择规则，\n你的订阅和配置将在这里生成。",
+    "pipelineInput": "输入",
+    "pipelineRules": "分流",
+    "pipelineOutput": "就绪",
+    "staleHint": "配置已修改，请重新生成后使用。",
+    "resultTitle": "你的订阅，已就绪。",
+    "copySubscription": "复制订阅链接",
+    "download": "下载配置",
+    "builtWith": "轻量构建 · 自由部署",
+    "footerNote": "规则由 MetaCubeX 提供",
+    "close": "关闭",
+    "customShort": "自定义模板",
+    "clipboardFailed": "复制失败，请手动选择并复制链接。",
+    "loadingTemplate": "正在加载模板",
+    "templateError": "请先修复规则模板",
+    "authNeeded": "请先验证访问令牌",
+    "showResult": "查看结果",
+    "generateAgain": "重新生成配置",
+    "skip": "跳转到工作区"
+  }
 }

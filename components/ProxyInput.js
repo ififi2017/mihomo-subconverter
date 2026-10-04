@@ -1,124 +1,136 @@
-import { Card, CardHeader, StepBadge, inputCls } from './UI'
-import { PROXY_PREFIXES } from '../lib/constants'
+import { useState } from 'react'
+import { Card, CardHeader, StepBadge, Icon } from './UI'
 
-/* ── Protocol badge colors [bg, text, border] ─────────────────────── */
-const PROTO_COLORS = {
-  hy2:    ['rgba(139,92,246,.12)',  '#7c3aed', 'rgba(139,92,246,.25)'],
-  anytls: ['rgba(6,182,212,.12)',   '#0e7490', 'rgba(6,182,212,.25)'],
-  vless:  ['rgba(37,99,235,.12)',   '#1d4ed8', 'rgba(37,99,235,.25)'],
-  trojan: ['rgba(244,63,94,.12)',   '#be123c', 'rgba(244,63,94,.25)'],
-  vmess:  ['rgba(245,158,11,.12)',  '#b45309', 'rgba(245,158,11,.25)'],
-  ss:     ['rgba(16,185,129,.12)',  '#047857', 'rgba(16,185,129,.25)'],
-  tuic:   ['rgba(236,72,153,.12)',  '#9d174d', 'rgba(236,72,153,.25)'],
-}
-const PROTO_LABELS = {
-  hy2: 'Hysteria2', anytls: 'AnyTLS', vless: 'VLESS',
-  trojan: 'Trojan', vmess: 'VMess', ss: 'Shadowsocks', tuic: 'TUIC',
-}
-
-function ProtoBadge({ proto, count }) {
-  const [bg, color, border] = PROTO_COLORS[proto] || ['rgba(100,100,100,.1)', '#6b7280', 'rgba(100,100,100,.2)']
+export default function ProxyInput({
+  value,
+  onChange,
+  extractedFrom,
+  analysis,
+  t,
+}) {
+  const [view, setView] = useState('source')
+  const { proxies, invalidLines, breakdown } = analysis
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 3,
-      padding: '1px 7px', borderRadius: 9999,
-      fontSize: 10.5, fontWeight: 500, whiteSpace: 'nowrap',
-      background: bg, color, border: `1px solid ${border}`, letterSpacing: .01,
-    }}>
-      {PROTO_LABELS[proto] ?? proto}<span style={{ opacity: .55, marginLeft: 1 }}>×{count}</span>
-    </span>
-  )
-}
-
-function analyzeProxies(proxyLinks) {
-  const MAP = {
-    'hysteria2://':'hy2','hy2://':'hy2','anytls://':'anytls',
-    'vless://':'vless','trojan://':'trojan','vmess://':'vmess',
-    'ss://':'ss','tuic://':'tuic',
-  }
-  const counts = {}
-  let invalid = 0
-  for (const line of proxyLinks.split('\n')) {
-    const l = line.trim()
-    if (!l || l.startsWith('#')) continue
-    const proto = Object.entries(MAP).find(([pfx]) => l.startsWith(pfx))?.[1]
-    if (proto) counts[proto] = (counts[proto] || 0) + 1
-    else invalid++
-  }
-  return {
-    total: Object.values(counts).reduce((a, b) => a + b, 0),
-    breakdown: Object.entries(counts),
-    invalid,
-  }
-}
-
-export default function ProxyInput({ value, onChange, extractedFrom, t }) {
-  const { total, breakdown, invalid } = analyzeProxies(value)
-
-  return (
-    <Card>
+    <Card className="node-panel" id="nodes">
       <CardHeader>
-        <div className="flex items-center gap-[9px] shrink-0">
-          <StepBadge n="1"/>
-          <span className="text-[13.5px] font-medium text-gray-900 dark:text-white whitespace-nowrap">
-            {t('step1.title')}
-          </span>
+        <div className="section-title">
+          <StepBadge n="1" />
+          <div>
+            <h2>{t('step1.title')}</h2>
+            <p>{t('studio.nodeSubtitle')}</p>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-[7px] min-w-0">
-          {extractedFrom && (
-            <span className="inline-flex items-center gap-1 px-[9px] py-[2px] rounded-full whitespace-nowrap
-              text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400
-              border border-emerald-500/20">
-              <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-              </svg>
-              {t('step1.extractedBadge')}
-            </span>
-          )}
-          {invalid > 0 && (
-            <span className="inline-flex items-center gap-1 px-[9px] py-[2px] rounded-full whitespace-nowrap
-              text-[11px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400
-              border border-amber-500/20">
-              <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
-              </svg>
-              {t('step1.invalidLines', { count: invalid })}
-            </span>
-          )}
-          {total > 0 && (
-            <div className="flex flex-wrap items-center justify-end gap-[5px]">
-              <span className="text-[11.5px] font-medium text-gray-400 dark:text-gray-500 whitespace-nowrap">
-                {t('step1.nodeCount', { count: total })}
-              </span>
-              <span className="text-gray-300 dark:text-gray-700 text-sm">·</span>
-              <div className="flex flex-wrap justify-end gap-[3px]">
-                {breakdown.map(([p,c]) => <ProtoBadge key={p} proto={p} count={c}/>)}
-              </div>
+        <span className="small-label">INPUT</span>
+      </CardHeader>
+      <div className="editor-tabs">
+        <div className="segmented" aria-label={t('step1.title')}>
+          <button
+            aria-pressed={view === 'source'}
+            onClick={() => setView('source')}
+          >
+            <Icon name="code" size={15} />
+            {t('studio.source')}
+          </button>
+          <button
+            aria-pressed={view === 'nodes'}
+            onClick={() => setView('nodes')}
+          >
+            <Icon name="nodes" size={15} />
+            {t('studio.nodeList')}
+            <span className="count">{proxies.length}</span>
+          </button>
+        </div>
+        <span className="editor-format">URI / YAML / BASE64</span>
+      </div>
+      {view === 'source' ? (
+        <div className={`source-editor ${value ? 'has-content' : ''}`}>
+          <div className="editor-gutter" aria-hidden="true">
+            {Array.from({ length: 7 }, (_, i) => (
+              <span key={i}>{String(i + 1).padStart(2, '0')}</span>
+            ))}
+          </div>
+          <textarea
+            id="proxy-input"
+            aria-label={t('step1.title')}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={t('studio.inputPlaceholder')}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoCorrect="off"
+          />
+          {!value && (
+            <div className="editor-watermark" aria-hidden="true">
+              <Icon name="nodes" size={66} />
             </div>
           )}
         </div>
-      </CardHeader>
-      <div className="p-[18px]">
-        <textarea
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          placeholder={t('step1.placeholder')}
-          rows={8}
-          className={inputCls}
-          spellCheck={false}
-        />
-        <p className="mt-2 text-[11.5px] text-gray-400 dark:text-gray-500 flex flex-wrap gap-[3px] items-center">
-          <span>{t('step1.supported')}</span>
-          {[
-            ['hy2','Hysteria2'],['anytls','AnyTLS'],['vless','VLESS'],
-            ['trojan','Trojan'],['vmess','VMess'],['ss','Shadowsocks'],['tuic','TUIC'],
-          ].map(([k, label], i, arr) => (
-            <span key={k}>
-              <code className="text-blue-500 dark:text-blue-400 font-mono text-[11px]">{label}</code>
-              {i < arr.length-1 && <span className="text-gray-200 dark:text-gray-700 ml-[3px]">·</span>}
+      ) : (
+        <div className="node-list">
+          {proxies.length ? (
+            proxies.map((p, i) => (
+              <div className="node-row" key={`${i}-${p.name}`}>
+                <span className="node-index">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <strong>{p.name}</strong>
+                  <span>
+                    {p.server}:{p.port}
+                  </span>
+                </div>
+                <span className="protocol-tag">{p.type}</span>
+                <Icon name="check" size={14} />
+              </div>
+            ))
+          ) : (
+            <div className="list-empty">
+              <Icon name="nodes" size={28} />
+              <p>{t('studio.noNodes')}</p>
+            </div>
+          )}
+        </div>
+      )}
+      <div className="editor-status" aria-live="polite">
+        <span className={`status-dot ${proxies.length ? 'ready' : ''}`} />
+        <span>
+          {proxies.length
+            ? t('step1.nodeCount', { count: proxies.length })
+            : t('studio.awaitingInput')}
+        </span>
+        <div className="protocol-breakdown">
+          {breakdown.map(([type, count]) => (
+            <span key={type}>
+              {type} <b>{count}</b>
             </span>
           ))}
+        </div>
+      </div>
+      {extractedFrom && (
+        <p className="inline-note success">
+          <Icon name="check" size={14} />
+          {t(
+            extractedFrom === 'base64'
+              ? 'step1.extractedBase64'
+              : extractedFrom === 'yaml'
+                ? 'step1.extractedYaml'
+                : 'step1.extractedBadge',
+          )}
         </p>
+      )}
+      {invalidLines.length > 0 && (
+        <p className="inline-note warning" role="status">
+          <Icon name="info" size={15} />
+          {t('studio.invalidAt', {
+            lines: invalidLines.slice(0, 8).join(', '),
+          })}
+          {invalidLines.length > 8 ? '…' : ''}
+        </p>
+      )}
+      <div className="panel-footnote">
+        <Icon name="shield" size={14} />
+        <span>{t('studio.localParsing')}</span>
+        <span className="protocol-total">7 {t('studio.protocols')}</span>
       </div>
     </Card>
   )

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { parseProxyLinks } from '../lib/parser'
+import { describe, it, expect, vi } from 'vitest'
+import { parseProxyLinks, expandPastedInput } from '../lib/parser'
 
 function one(link) {
   const proxies = parseProxyLinks(link)
@@ -215,5 +215,71 @@ describe('name decoding', () => {
   it('falls back to host:port when no name is given', () => {
     const p = one('trojan://pw@t.example.com:443')
     expect(p.name).toBe('t.example.com:443')
+  })
+})
+
+describe('VLESS xhttp', () => {
+  it('parses type=xhttp into network + xhttp-opts', () => {
+    const p = one('vless://uuid@x.example.com:443?type=xhttp&path=%2Fapi&host=cdn.example.com&mode=auto&security=tls&sni=cdn.example.com#X')
+    expect(p.network).toBe('xhttp')
+    expect(p.tls).toBe(true)
+    expect(p['xhttp-opts']).toEqual({
+      path: '/api', host: 'cdn.example.com', mode: 'auto',
+    })
+  })
+
+  it('treats splithttp as xhttp', () => {
+    const p = one('vless://uuid@x.example.com:443?type=splithttp&path=/&security=tls#S')
+    expect(p.network).toBe('xhttp')
+    expect(p['xhttp-opts'].path).toBe('/')
+  })
+})
+
+describe('paste import', () => {
+  it('decodes a base64 subscription of URI lines', () => {
+    const b64 = Buffer.from('trojan://pw@t.example.com:443#B64\n').toString('base64')
+    const proxies = parseProxyLinks(b64)
+    expect(proxies).toHaveLength(1)
+    expect(proxies[0].name).toBe('B64')
+    expect(expandPastedInput(b64).kind).toBe('base64')
+  })
+
+  it('parses Clash YAML block proxies', () => {
+    const yaml = `
+proxies:
+  - name: YAML-SS
+    type: ss
+    server: 1.2.3.4
+    port: 8388
+    cipher: aes-128-gcm
+    password: secret
+proxy-groups:
+  - name: select
+    type: select
+`
+    const proxies = parseProxyLinks(yaml)
+    expect(proxies).toHaveLength(1)
+    expect(proxies[0]).toMatchObject({
+      name: 'YAML-SS', type: 'ss', server: '1.2.3.4', port: 8388,
+      cipher: 'aes-128-gcm', password: 'secret',
+    })
+    expect(expandPastedInput(yaml).kind).toBe('yaml')
+  })
+
+  it('parses Clash YAML flow-style proxies', () => {
+    const yaml = `proxies:\n  - { name: Flow, type: trojan, server: t.example.com, port: 443, password: pw }\n`
+    const proxies = parseProxyLinks(yaml)
+    expect(proxies).toHaveLength(1)
+    expect(proxies[0].name).toBe('Flow')
+    expect(proxies[0].type).toBe('trojan')
+  })
+
+  it('does not log the raw proxy URI on parse failure', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    parseProxyLinks('vmess://!!!not-base64-json!!!')
+    const logged = spy.mock.calls.map(c => c.join(' ')).join(' ')
+    expect(logged).not.toContain('!!!not-base64')
+    expect(logged).toContain('vmess')
+    spy.mockRestore()
   })
 })

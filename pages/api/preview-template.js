@@ -7,9 +7,11 @@
  * Response: { groups: string[] }
  */
 import { parseIni } from '../../lib/iniParser'
-import { validateTemplateUrl, fetchTextCapped } from '../../lib/safeFetch'
+import { validateTemplateUrl } from '../../lib/safeFetch'
 import { checkAccessToken } from '../../lib/auth'
 import { DEFAULT_TEMPLATE_URL } from '../../lib/constants'
+import { loadTemplateIni } from '../../lib/templateResolve'
+import { isDefaultTemplateUrl } from '../../lib/githubMirror'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -21,24 +23,23 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized', authRequired: true, groups: [] })
   }
 
-  // req.query is already URL-decoded by Next.js — do not decode again.
   const { url } = req.query
 
   let templateUrl = DEFAULT_TEMPLATE_URL
+  let isDefault = true
   if (url) {
     const validated = validateTemplateUrl(url)
     if (!validated) {
       return res.status(400).json({ error: 'Invalid template URL', groups: [] })
     }
     templateUrl = validated
+    isDefault = isDefaultTemplateUrl(validated)
   }
 
   try {
-    const iniText = await fetchTextCapped(templateUrl)
-    const { rulesets } = parseIni(iniText)
+    const { ini } = await loadTemplateIni(templateUrl, { isDefault })
+    const { rulesets } = parseIni(ini)
 
-    // Collect unique group names that have URL-based rulesets (toggleable services).
-    // Inline rules (GEOIP, FINAL, etc.) are always included and not shown as checkboxes.
     const seen   = new Set()
     const groups = []
     for (const rs of rulesets) {
