@@ -16,6 +16,7 @@ import ProxyInput from '../components/ProxyInput'
 import RuleGroups from '../components/RuleGroups'
 import CustomRules, { GuidePanel } from '../components/CustomRules'
 import ResultPanel from '../components/ResultPanel'
+import ShadowrocketExport from '../components/ShadowrocketExport'
 import { Card, Icon, LogoMark } from '../components/UI'
 import { analyzeInput, configRevision } from '../lib/workspaceState'
 
@@ -715,6 +716,16 @@ export default function Home() {
                       <span>{error}</span>
                     </div>
                   )}
+                  <ShadowrocketExport
+                    templateUrl={templateUrl}
+                    customRules={customRules}
+                    selectedGroups={effectiveGroups}
+                    accessToken={accessToken}
+                    disabled={generationDisabled}
+                    onCopy={copyToClipboard}
+                    copied={copied}
+                    t={t}
+                  />
                   <ResultPanel
                     subUrl={subUrl}
                     yamlPreview={yamlPreview}

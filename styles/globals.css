@@ -1236,6 +1236,27 @@ details[open] > summary > svg:last-child {
   background: var(--line);
   width: 35px;
 }
+.shadowrocket-export {
+  border-top: 1px solid var(--line);
+  padding: 20px 23px;
+}
+.shadowrocket-export h3 {
+  font-size: 14px;
+  font-weight: 500;
+}
+.shadowrocket-export p {
+  margin: 8px 0 12px;
+  font-size: 11px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.shadowrocket-export .stale-notice,
+.shadowrocket-export .warning {
+  color: var(--warning);
+}
+.shadowrocket-export .inline-error {
+  color: var(--danger);
+}
 .result-panel {
   border-top: 1px solid var(--line);
   background: var(--input);
