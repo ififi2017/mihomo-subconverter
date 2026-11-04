@@ -5,6 +5,7 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/api/clash': ['./templates/MetaCubeX_Full.ini'],
     '/api/preview-template': ['./templates/MetaCubeX_Full.ini'],
+    '/api/shadowrocket': ['./templates/MetaCubeX_Full.ini'],
   },
 
   async headers() {

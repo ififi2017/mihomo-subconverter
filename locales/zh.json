@@ -80,6 +80,14 @@
     "qrHint": "使用手机客户端扫码导入订阅",
     "qrTooLong": "链接过长，超出二维码容量，请改用复制粘贴。"
   },
+  "shadowrocket": {
+    "title": "Shadowrocket 规则配置",
+    "description": "无需填写节点，导出已勾选的规则分组与自定义规则。",
+    "generate": "生成 Shadowrocket 规则 URL",
+    "copy": "复制规则配置 URL",
+    "usage": "在 Shadowrocket 的「配置 → 添加配置」中粘贴此 URL，下载后选中使用；节点在首页单独添加。",
+    "stale": "规则已修改，请重新生成 Shadowrocket URL。"
+  },
   "auth": {
     "title": "需要访问令牌",
     "placeholder": "请输入该部署的访问令牌",

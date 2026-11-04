@@ -80,6 +80,14 @@
     "qrHint": "Scan with your mobile client to import the subscription",
     "qrTooLong": "The link is too long to fit in a QR code — use copy & paste instead."
   },
+  "shadowrocket": {
+    "title": "Shadowrocket Rules",
+    "description": "Export selected rule groups and custom rules. No proxy input needed.",
+    "generate": "Generate Shadowrocket Rules URL",
+    "copy": "Copy Rules URL",
+    "usage": "Paste this URL in Shadowrocket → Config → Add Configuration, download it and select it. Add nodes separately on the home screen.",
+    "stale": "Rules changed. Generate a new Shadowrocket URL."
+  },
   "auth": {
     "title": "Access Token Required",
     "placeholder": "Enter the access token of this deployment",
